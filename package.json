@@ -1,0 +1,9 @@
+{
+  "name": "classroom-seating-clean",
+  "version": "1.0.0",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node -e \"const fs=require('node:fs');fs.mkdirSync('dist',{recursive:true});fs.copyFileSync('index.html','dist/index.html')\""
+  }
+}

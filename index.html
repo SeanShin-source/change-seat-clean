@@ -1,0 +1,1469 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2463eb" />
+    <meta name="description" content="우리 교실의 새로운 자리. 학생 수와 좌석을 설정하고 간편하게 자리를 배정하세요." />
+    <title>자리바꾸기 · 즐거운 교실, 새로운 자리로</title>
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTYiIGZpbGw9IiMyNDYzZWIiLz48ZyBmaWxsPSJ3aGl0ZSI+PHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHJ4PSI0Ii8+PHJlY3QgeD0iMzUiIHk9IjE1IiB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHJ4PSI0Ii8+PHJlY3QgeD0iMTUiIHk9IjM1IiB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHJ4PSI0Ii8+PHJlY3QgeD0iMzUiIHk9IjM1IiB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHJ4PSI0Ii8+PC9nPjwvc3ZnPgo=" type="image/svg+xml" />
+    <style>
+:root {
+  font-family:"Pretendard","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  color:#18253b;
+  background:#f3f6fa;
+  font-synthesis:none;
+  --blue:#2463eb;
+  --muted:#65748b;
+  --line:#e7ecf3
+}
+
+* {
+  box-sizing:border-box
+}
+
+body {
+  margin:0
+}
+
+button,input {
+  font:inherit
+}
+
+button {
+  cursor:pointer
+}
+
+button:disabled {
+  cursor:default
+}
+
+button,input {
+  -webkit-tap-highlight-color:transparent
+}
+
+button:focus-visible,input:focus-visible {
+  outline:3px solid #80aaff;
+  outline-offset:4px
+}
+
+h1,h2,p {
+  margin:0
+}
+
+[hidden] {
+  display:none!important
+}
+
+.icon {
+  width:22px;
+  height:22px;
+  flex-shrink:0;
+  vertical-align:middle
+}
+
+.muted {
+  color:var(--muted);
+  font-weight:400
+}
+
+.button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  min-height:46px;
+  border-radius:10px;
+  border:1px solid transparent;
+  font-weight:700;
+  transition:background .15s,border-color .15s
+}
+
+.primary {
+  background:var(--blue);
+  color:white
+}
+
+.primary:hover:not(:disabled) {
+  background:#174fcc
+}
+
+.primary:disabled {
+  background:#e5ebf5;
+  color:#6b7d98
+}
+
+.secondary {
+  background:white;
+  border-color:#dce4ef;
+  color:#425875
+}
+
+.secondary:hover:not(:disabled),.help-button:hover {
+  background:#f0f5ff;
+  border-color:#b8cef6
+}
+
+.secondary:disabled,.reset-button:disabled {
+  color:#8a96a9;
+  background:#f7f9fc
+}
+
+.brand-mark {
+  width:48px;
+  height:48px;
+  background:#eaf1ff;
+  color:var(--blue);
+  display:grid;
+  place-items:center;
+  border-radius:13px
+}
+
+.brand-mark .icon {
+  width:27px;
+  height:27px
+}
+
+.app-shell {
+  max-width:1600px;
+  margin:0 auto;
+  padding:22px 28px 12px
+}
+
+.app-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:20px;
+  padding:8px 2px
+}
+
+.brand {
+  display:flex;
+  gap:15px;
+  align-items:center
+}
+
+.brand h1 {
+  font-size:28px;
+  letter-spacing:-1.2px;
+  line-height:1.3
+}
+
+.brand p {
+  margin-top:4px;
+  font-size:14px;
+  color:var(--muted)
+}
+
+h1:focus {
+  outline:none
+}
+
+.help-button {
+  background:transparent;
+  color:#5f7088;
+  padding:0 14px;
+  font-size:14px
+}
+
+.workspace {
+  display:grid;
+  grid-template-columns:310px minmax(0,1fr);
+  gap:20px;
+  align-items:stretch
+}
+
+.card {
+  background:white;
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:0 3px 12px #19396303
+}
+
+.settings {
+  padding:26px 24px;
+  display:flex;
+  flex-direction:column
+}
+
+.settings h2 {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:18px;
+  letter-spacing:-.6px;
+  margin-bottom:20px
+}
+
+.step-number {
+  background:#edf3ff;
+  color:#2c63c7;
+  font-size:13px;
+  display:inline-grid;
+  place-items:center;
+  width:25px;
+  height:25px;
+  border-radius:8px
+}
+
+.settings label {
+  font-size:14px;
+  font-weight:600;
+  display:block;
+  margin-bottom:10px
+}
+
+.number-range {
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+
+.range-start {
+  height:48px;
+  width:53px;
+  display:grid;
+  place-items:center;
+  background:#f5f7fa;
+  border:1px solid #e6ebf2;
+  border-radius:9px;
+  font-size:19px;
+  font-weight:600
+}
+
+.range-separator {
+  color:#8591a4
+}
+
+.number-range input {
+  width:79px;
+  height:48px;
+  border:1px solid #cbd6e5;
+  border-radius:9px;
+  text-align:center;
+  font-size:20px;
+  font-weight:700;
+  color:#18253b;
+  background:white;
+  padding-left:7px
+}
+
+.number-range input:disabled {
+  color:#65748b;
+  background:#f5f7fa
+}
+
+.number-range input[aria-invalid=true] {
+  border-color:#c04a44
+}
+
+.student-total {
+  font-size:14px;
+  white-space:nowrap;
+  margin-left:auto
+}
+
+.student-total strong {
+  color:var(--blue)
+}
+
+.hint {
+  display:flex;
+  gap:8px;
+  background:#f6f8fc;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.8;
+  padding:12px;
+  border-radius:9px;
+  margin-top:14px
+}
+
+.hint .icon {
+  width:17px;
+  height:17px;
+  color:#6d8dbb;
+  margin-top:3px
+}
+
+.seat-settings,.assignment-settings {
+  border-top:1px solid var(--line);
+  margin-top:24px;
+  padding-top:24px
+}
+
+.optional {
+  font-size:12px;
+  font-weight:400;
+  color:#8491a4;
+  margin-left:auto
+}
+
+.section-description {
+  font-size:13px;
+  line-height:1.85;
+  color:var(--muted);
+  margin-top:-6px;
+  margin-bottom:14px
+}
+
+.settings .button {
+  width:100%
+}
+
+.secondary {
+  font-size:14px
+}
+
+.secondary .icon {
+  width:17px;
+  height:17px;
+  color:#5c80b5
+}
+
+.readiness {
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:14px
+}
+
+.readiness strong {
+  color:#334a6b;
+  margin-left:3px
+}
+
+.readiness .insufficient {
+  color:#ac403b
+}
+
+.settings .primary {
+  min-height:51px;
+  font-size:17px
+}
+
+.reset-button {
+  background:transparent;
+  color:#748198;
+  font-size:13px;
+  margin-top:7px;
+  min-height:36px
+}
+
+.reset-button:hover:not(:disabled) {
+  background:#f4f7fb
+}
+
+.reset-button .icon {
+  width:16px;
+  height:16px
+}
+
+.settings-footnote {
+  font-size:11px;
+  color:#8793a4;
+  text-align:center;
+  padding-top:16px;
+  margin-top:auto;
+  line-height:1.7
+}
+
+.input-error {
+  font-size:12px;
+  color:#ac403b;
+  margin-top:8px
+}
+
+.settings-error {
+  background:#fff3ef;
+  color:#a13f31;
+  border-radius:8px;
+  padding:10px;
+  font-size:13px;
+  line-height:1.65;
+  margin-bottom:12px
+}
+
+.completion-notice {
+  display:flex;
+  gap:7px;
+  background:#f1f6ff;
+  border-radius:8px;
+  font-size:12px;
+  color:#546e98;
+  line-height:1.7;
+  margin-top:12px;
+  padding:10px
+}
+
+.completion-notice .icon {
+  width:16px;
+  height:16px;
+  margin-top:2px
+}
+
+.classroom {
+  padding:24px 30px 0;
+  display:flex;
+  flex-direction:column
+}
+
+.classroom-heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:center
+}
+
+.classroom-heading h2 {
+  display:inline-block;
+  font-size:17px;
+  letter-spacing:-.5px
+}
+
+.room-dimensions {
+  font-size:12px;
+  color:#8895a8;
+  margin-left:12px
+}
+
+.phase-badge {
+  padding:6px 10px;
+  border-radius:6px;
+  background:#f0f5ff;
+  color:#5074b6;
+  font-size:12px;
+  white-space:nowrap
+}
+
+.phase-badge.complete {
+  background:#edf7f3;
+  color:#347961
+}
+
+.room {
+  width:100%;
+  max-width:1050px;
+  margin:0 auto;
+  padding:14px 12px 0;
+  flex:1
+}
+
+.front-label {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  font-size:11px;
+  color:#97a3b4;
+  letter-spacing:1px;
+  margin:0 auto 10px;
+  max-width:320px
+}
+
+.front-label span {
+  width:45px;
+  height:1px;
+  background:#e8edf4
+}
+
+.teacher-desk {
+  width:46%;
+  height:43px;
+  margin:0 auto 13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  border:1px solid #dce3ed;
+  border-radius:9px;
+  background:#f6f8fb;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:4px;
+  color:#65748b
+}
+
+.teacher-desk .icon {
+  width:20px;
+  height:20px
+}
+
+.column-labels {
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:8px;
+  text-align:center;
+  color:#8d9bb0;
+  font-size:11px
+}
+
+.seat-grid {
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:12px
+}
+
+.seat {
+  height:clamp(60px,8vh,94px);
+  min-width:0;
+  border:1px solid #afcaf3;
+  border-radius:11px;
+  background:#f3f8ff;
+  color:#1b3557;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1px;
+  transition:background .15s,border-color .15s
+}
+
+.seat:hover:not(:disabled) {
+  background:#e6f0ff;
+  border-color:#4285ee
+}
+
+.seat.inactive {
+  background:#f0f2f5;
+  border-color:#dbe1e9;
+  color:#8a94a3
+}
+
+.seat.inactive:hover:not(:disabled) {
+  background:#e9edf2;
+  border-color:#b7c0ce
+}
+
+.seat.assigned {
+  background:#edf5ff;
+  border-color:#83b0f2
+}
+
+.seat:disabled {
+  opacity:1
+}
+
+.seat-number {
+  font-size:clamp(23px,2.1vw,36px);
+  font-weight:750;
+  line-height:1.2;
+  font-variant-numeric:tabular-nums
+}
+
+.seat-dash {
+  font-size:22px;
+  font-weight:600;
+  line-height:1
+}
+
+.seat-caption {
+  font-size:11px;
+  line-height:1.7
+}
+
+.empty-seat-mark {
+  width:17px;
+  height:3px;
+  border-radius:4px;
+  background:#c9daf3
+}
+
+.back-label {
+  text-align:center;
+  margin:10px 0 14px;
+  font-size:11px;
+  color:#97a3b4;
+  letter-spacing:1px
+}
+
+.seat-footer {
+  border-top:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:17px 0;
+  font-size:12px
+}
+
+.legend,.legend>span {
+  display:flex;
+  align-items:center;
+  gap:7px
+}
+
+.legend {
+  gap:18px;
+  color:#6c7b90
+}
+
+.legend-box {
+  display:inline-block;
+  width:14px;
+  height:14px;
+  border-radius:4px;
+  background:#eef5ff;
+  border:1px solid #9dc1f2
+}
+
+.legend-box.inactive {
+  background:#f0f2f5;
+  border-color:#d4dae3
+}
+
+.seat-counter {
+  display:flex;
+  gap:12px;
+  color:#768499;
+  white-space:nowrap
+}
+
+.seat-counter strong {
+  font-size:15px;
+  font-weight:700;
+  color:var(--blue);
+  margin-left:4px
+}
+
+.seat-counter #inactive-count {
+  color:#6d7c90
+}
+
+.counter-divider {
+  color:#d5dce6
+}
+
+.page-footer {
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  padding:15px 3px 0;
+  font-size:11px;
+  color:#8995a6
+}
+
+.welcome {
+  min-height:100svh;
+  display:grid;
+  place-items:center;
+  padding:32px 20px
+}
+
+.welcome-card {
+  max-width:670px;
+  width:100%;
+  padding:38px 44px 26px;
+  background:white;
+  border:1px solid var(--line);
+  border-radius:22px;
+  box-shadow:0 12px 50px #173b6905;
+  text-align:center
+}
+
+.brand-mark.large {
+  margin:0 auto 18px;
+  width:60px;
+  height:60px;
+  border-radius:17px
+}
+
+.brand-mark.large .icon {
+  width:32px;
+  height:32px
+}
+
+.eyebrow {
+  font-size:12px;
+  color:#6683b3;
+  letter-spacing:1px;
+  margin-bottom:9px
+}
+
+.welcome h1 {
+  font-size:27px;
+  letter-spacing:-1.3px;
+  line-height:1.4
+}
+
+.welcome-subtitle {
+  font-size:14px;
+  color:var(--muted);
+  margin-top:12px;
+  line-height:1.7
+}
+
+.notice-list {
+  counter-reset:notice;
+  list-style:none;
+  padding:0;
+  margin:26px 0;
+  text-align:left;
+  display:grid;
+  gap:18px
+}
+
+.notice-list li {
+  display:flex;
+  gap:12px;
+  font-size:14px;
+  line-height:1.75;
+  color:#52617a
+}
+
+.notice-list li:before {
+  counter-increment:notice;
+  content:counter(notice);
+  display:inline-grid;
+  place-items:center;
+  width:24px;
+  height:24px;
+  flex-shrink:0;
+  background:#f0f4f9;
+  color:#7a8ba3;
+  border-radius:7px;
+  font-size:12px;
+  font-weight:700
+}
+
+.notice-highlight {
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  text-align:left;
+  background:#f2f6fe;
+  border:1px solid #e6edfa;
+  border-radius:12px;
+  padding:17px;
+  color:#42638e;
+  font-size:13px;
+  line-height:1.8
+}
+
+.notice-highlight .icon {
+  width:19px;
+  height:19px;
+  margin-top:2px
+}
+
+.notice-highlight span {
+  font-size:12px;
+  color:#7a8ba5
+}
+
+.start-button {
+  margin-top:24px;
+  min-height:54px;
+  width:100%;
+  font-size:16px
+}
+
+.welcome-footer {
+  color:#98a4b4;
+  font-size:11px;
+  margin-top:20px
+}
+
+.help-dialog {
+  border:1px solid var(--line);
+  border-radius:18px;
+  max-width:550px;
+  width:calc(100% - 36px);
+  padding:30px;
+  color:#18253b
+}
+
+.help-dialog::backdrop {
+  background:#17274455
+}
+
+.help-dialog h2 {
+  font-size:22px
+}
+
+.help-dialog .button {
+  width:100%;
+  margin-top:20px
+}
+
+.help-dialog .hint {
+  display:block
+}
+
+.countdown-overlay {
+  position:fixed;
+  inset:0;
+  background:#101e334a;
+  display:grid;
+  place-items:center;
+  z-index:20;
+  padding:20px;
+  backdrop-filter:blur(3px)
+}
+
+.countdown-card {
+  width:370px;
+  max-width:100%;
+  border-radius:22px;
+  background:white;
+  text-align:center;
+  padding:36px 24px 30px;
+  box-shadow:0 20px 70px #1727441f
+}
+
+.countdown-card p {
+  font-size:18px;
+  font-weight:600
+}
+
+.countdown-number {
+  font-size:132px;
+  line-height:1.5;
+  color:var(--blue);
+  font-weight:700;
+  font-variant-numeric:tabular-nums
+}
+
+.countdown-card>span {
+  font-size:13px;
+  color:#8290a4
+}
+
+@media(min-width:1600px) {
+  .app-shell {
+    padding-top:36px
+  }
+  .workspace {
+    grid-template-columns:340px minmax(0,1fr);
+    gap:24px
+  }
+  .settings {
+    padding:32px 28px
+  }
+  .classroom {
+    padding:28px 38px 0
+  }
+  .app-header {
+    margin-bottom:26px
+  }
+  .settings h2 {
+    font-size:20px
+  }
+  .settings label,.section-description,.student-total {
+    font-size:15px
+  }
+  .hint {
+    font-size:14px
+  }
+  .seat-settings,.assignment-settings {
+    margin-top:32px;
+    padding-top:32px
+  }
+  .readiness {
+    font-size:14px
+  }
+  .classroom-heading h2 {
+    font-size:20px
+  }
+  .room {
+    padding-top:22px
+  }
+  .teacher-desk {
+    height:48px;
+    margin-bottom:20px
+  }
+  .seat-grid {
+    gap:15px
+  }
+  .seat-footer {
+    padding:23px 0;
+    font-size:14px
+  }
+  .seat-caption {
+    font-size:13px
+  }
+  .settings-footnote {
+    font-size:12px
+  }
+}
+
+@media(max-width:1100px) {
+  .app-shell {
+    padding:18px
+  }
+  .workspace {
+    grid-template-columns:285px minmax(0,1fr);
+    gap:16px
+  }
+  .settings {
+    padding:22px 18px
+  }
+  .classroom {
+    padding:22px 18px 0
+  }
+  .room {
+    padding-left:0;
+    padding-right:0
+  }
+  .room-dimensions {
+    display:block;
+    margin:5px 0 0
+  }
+  .seat-grid,.column-labels {
+    gap:8px
+  }
+  .seat-footer {
+    flex-wrap:wrap;
+    justify-content:center
+  }
+  .seat-counter {
+    gap:8px
+  }
+}
+
+@media(max-width:760px) {
+  .app-shell {
+    padding:16px 12px
+  }
+  .app-header {
+    margin-bottom:14px
+  }
+  .brand {
+    gap:10px
+  }
+  .brand-mark {
+    width:42px;
+    height:42px
+  }
+  .brand h1 {
+    font-size:23px
+  }
+  .brand p {
+    font-size:11px
+  }
+  .help-button {
+    padding:0 6px;
+    gap:5px;
+    font-size:12px
+  }
+  .help-button .icon {
+    width:18px;
+    height:18px
+  }
+  .workspace {
+    display:flex;
+    flex-direction:column;
+    gap:14px
+  }
+  .settings {
+    padding:20px
+  }
+  .settings h2 {
+    margin-bottom:14px
+  }
+  .seat-settings,.assignment-settings {
+    margin-top:18px;
+    padding-top:18px
+  }
+  .settings-footnote {
+    padding-top:10px
+  }
+  .classroom {
+    padding:20px 14px 0
+  }
+  .room {
+    padding-top:16px
+  }
+  .seat-grid,.column-labels {
+    gap:7px
+  }
+  .seat {
+    height:58px;
+    border-radius:8px
+  }
+  .seat-number {
+    font-size:24px
+  }
+  .seat-caption {
+    font-size:10px
+  }
+  .teacher-desk {
+    width:52%;
+    height:38px
+  }
+  .seat-footer {
+    font-size:11px;
+    padding:14px 0
+  }
+  .legend {
+    gap:13px
+  }
+  .page-footer {
+    justify-content:center;
+    line-height:1.7;
+    text-align:center
+  }
+  .page-footer>span:first-child {
+    display:none
+  }
+  .welcome {
+    padding:18px 12px
+  }
+  .welcome-card {
+    padding:28px 23px 22px;
+    border-radius:18px
+  }
+  .welcome h1 {
+    font-size:23px
+  }
+  .welcome-subtitle {
+    font-size:13px
+  }
+  .notice-list li {
+    font-size:13px
+  }
+  .notice-highlight {
+    padding:13px;
+    font-size:12px
+  }
+  .notice-highlight span {
+    font-size:11px
+  }
+  .notice-list {
+    gap:16px
+  }
+  .welcome-card .brand-mark {
+    margin-bottom:16px
+  }
+}
+
+@media(min-width:761px) and (max-height:850px) {
+  .app-shell {
+    padding-top:12px;
+    padding-bottom:8px
+  }
+  .app-header {
+    padding:4px 2px;
+    margin-bottom:12px
+  }
+  .brand h1 {
+    font-size:25px
+  }
+  .brand p {
+    font-size:12px
+  }
+  .settings {
+    padding:19px 22px
+  }
+  .settings h2 {
+    font-size:17px;
+    line-height:1.4;
+    margin-bottom:13px
+  }
+  .settings label {
+    margin-bottom:8px
+  }
+  .hint {
+    padding:10px;
+    margin-top:10px;
+    line-height:1.65;
+    font-size:12px
+  }
+  .seat-settings,.assignment-settings {
+    margin-top:15px;
+    padding-top:15px
+  }
+  .section-description {
+    font-size:12px;
+    line-height:1.7;
+    margin-bottom:10px;
+    margin-top:0
+  }
+  .settings .secondary {
+    min-height:40px
+  }
+  .readiness {
+    margin-bottom:10px
+  }
+  .settings .primary {
+    min-height:47px
+  }
+  .settings-footnote {
+    padding-top:8px;
+    font-size:10px
+  }
+  .reset-button {
+    margin-top:4px;
+    min-height:32px
+  }
+  .classroom {
+    padding:18px 26px 0
+  }
+  .room {
+    padding-top:9px
+  }
+  .front-label {
+    margin-bottom:7px
+  }
+  .teacher-desk {
+    height:36px;
+    margin-bottom:9px
+  }
+  .seat-grid {
+    gap:10px
+  }
+  .seat {
+    height:clamp(46px,7.1vh,59px)
+  }
+  .back-label {
+    margin:8px 0 10px
+  }
+  .seat-footer {
+    padding:13px 0
+  }
+  .page-footer {
+    padding-top:10px
+  }
+  .completion-notice {
+    font-size:11px;
+    margin-top:8px;
+    padding:8px;
+    line-height:1.6
+  }
+  .settings:has(.completion-notice:not([hidden])) .settings-footnote {
+    display:none
+  }
+}
+
+@media(min-width:1600px) {
+  .app-shell {
+    padding-top:28px
+  }
+  .room {
+    padding-top:18px
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  * {
+    transition:none!important;
+    scroll-behavior:auto!important
+  }
+}
+
+
+    </style>
+  </head>
+  <body>
+    <div id="app"><main class="welcome"><div class="welcome-card"><h1>자리바꾸기를 불러오고 있어요</h1><p class="welcome-subtitle">화면이 바뀌지 않으면 최신 버전의 브라우저에서 다시 열어주세요.</p></div></main></div>
+    <noscript>자리바꾸기를 사용하려면 브라우저에서 JavaScript를 허용해주세요.</noscript>
+    <script>
+function isValidStudentCount(value) {
+  return Number.isInteger(value) && value >= 1 && value <= 30;
+}
+
+function parseStudentCount(value) {
+  if (!/^\d+$/.test(String(value))) return null;
+  const count = Number(value);
+  return isValidStudentCount(count) ? count : null;
+}
+
+function validateSettings(studentCount, seats) {
+  if (!isValidStudentCount(studentCount)) return '학생 수는 1명부터 30명까지 입력해주세요.';
+  if (seats.filter((seat) => seat.active).length < studentCount) {
+    return '학생 수보다 사용 가능한 좌석이 부족합니다.';
+  }
+  return '';
+}
+
+
+
+function shuffleArray(array, random = Math.random) {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function verifyAssignments(studentCount, seats) {
+  const assigned = seats.filter((seat) => seat.student !== null);
+  const numbers = assigned.map((seat) => seat.student);
+  if (assigned.length !== studentCount || new Set(numbers).size !== studentCount ||
+      assigned.some((seat) => !seat.active) ||
+      numbers.some((n) => !Number.isInteger(n) || n < 1 || n > studentCount)) return false;
+  return true;
+}
+
+function validateAssignmentSettings(studentCount, seats) {
+  const error = validateSettings(studentCount, seats);
+  if (error) throw new Error(error);
+}
+
+function createSeatAssignments(studentCount, seats, random = Math.random) {
+  validateAssignmentSettings(studentCount, seats);
+  const result = seats.map((seat) => ({ ...seat, student: null }));
+  const students = Array.from({ length: studentCount }, (_, i) => i + 1);
+  const available = shuffleArray(result.filter((seat) => seat.active), random);
+  shuffleArray(students, random).forEach((student, index) => { available[index].student = student; });
+  if (!verifyAssignments(studentCount, result)) throw new Error('자리 배정을 완료하지 못했습니다. 다시 시도해주세요.');
+  return result;
+}
+
+
+
+
+const ROWS = 6;
+const COLUMNS = 6;
+function createSeats() {
+  return Array.from({ length: ROWS * COLUMNS }, (_, index) => ({
+    id: `${Math.floor(index / COLUMNS)}-${index % COLUMNS}`,
+    row: Math.floor(index / COLUMNS), col: index % COLUMNS, active: true, student: null,
+  }));
+}
+function createInitialState() {
+  return { phase: 'welcome', studentCount: 26, seats: createSeats(), countdown: null, error: '' };
+}
+function reduceState(state, action) {
+  if (action.type === 'START' && state.phase === 'welcome') return { ...state, phase: 'setup' };
+  if (state.phase === 'countdown') {
+    if (action.type === 'TICK') return { ...state, countdown: action.value };
+    if (action.type === 'COMPLETE') {
+      try {
+        return { ...state, phase: 'complete', countdown: null,
+          seats: createSeatAssignments(state.studentCount, state.seats) };
+      } catch (error) {
+        return { ...state, phase: 'setup', countdown: null, error: error.message };
+      }
+    }
+    return state;
+  }
+  if (state.phase !== 'setup') return state;
+  switch (action.type) {
+    case 'SET_COUNT':
+      return isValidStudentCount(action.value) ? { ...state, studentCount: action.value, error: '' } : state;
+    case 'TOGGLE_SEAT':
+      return { ...state, error: '', seats: state.seats.map((seat) =>
+        seat.id === action.id ? { ...seat, active: !seat.active } : seat) };
+    case 'ACTIVATE_ALL':
+      return { ...state, error: '', seats: state.seats.map((seat) => ({ ...seat, active: true })) };
+    case 'RESET': return { ...createInitialState(), phase: 'setup' };
+    case 'ERROR': return { ...state, error: action.message };
+    case 'SHUFFLE':
+      try {
+        // 카운트다운 전에 모든 조건을 검사하되, 실제 결과는 공개 순간 생성합니다.
+        validateAssignmentSettings(state.studentCount, state.seats);
+        return { ...state, phase: 'countdown', countdown: 3, error: '' };
+      } catch (error) { return { ...state, error: error.message }; }
+    default: return state;
+  }
+}
+
+
+async function runCountdown(onTick, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))) {
+  onTick(3);
+  await sleep(1000);
+  onTick(2);
+  await sleep(1000);
+  onTick(1);
+  await sleep(1000);
+}
+
+
+function icon(name, className = '') {
+  const paths = {
+    grid: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
+    shuffle: '<path d="m17 3 4 4-4 4M3 7h3c5 0 7 10 12 10h3m-4-4 4 4-4 4M3 17h3c2 0 3.5-2 5-4m3-4c1-1.3 2.3-2 4-2h3"/>',
+    reset: '<path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/>',
+    arrow: '<path d="M5 12h14m-5-5 5 5-5 5"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/>',
+    check: '<path d="m5 12 4 4L19 6"/>',
+    desk: '<path d="M3 8h18v6H3zm3 6v6m12-6v6M6 4h12"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .7-1.5 1.2-1.5 2m0 3v.1"/>',
+  };
+  return `<svg class="icon ${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.grid}</svg>`;
+}
+
+const notices = [
+  '학생 번호는 1번부터 최대 30번까지 설정할 수 있습니다.',
+  '사용하지 않는 자리는 좌석을 클릭하여 비활성화할 수 있습니다.',
+  '비활성화된 자리에는 학생 번호가 배정되지 않습니다.',
+  '자리 배정을 시작하기 전에 학생 수와 사용 가능한 좌석 수를 확인해주세요.',
+];
+
+function welcomeScreen() {
+  return `<main class="welcome"><div class="welcome-card">
+    <div class="brand-mark large">${icon('grid')}</div><p class="eyebrow">우리 교실의 새로운 시작</p>
+    <h1>자리바꾸기 프로그램 실행하기</h1><p class="welcome-subtitle">자리바꾸기를 시작하기 전 아래 유의사항을 확인해주세요.</p>
+    <ol class="notice-list">${notices.map((notice) => `<li>${notice}</li>`).join('')}</ol>
+    <div class="notice-highlight">${icon('info')}<p><strong>자리를 한 번 바꾼 뒤엔 자리를 다시 바꿀 수 없어요!</strong><br><span>설정을 모두 확인한 후 자리 배정을 시작해주세요.</span></p></div>
+    <button type="button" class="button primary start-button" id="start">시작하기 ${icon('arrow')}</button>
+    <p class="welcome-footer">즐거운 교실, 새로운 자리로</p>
+  </div></main>`;
+}
+
+function mainScreen() {
+  return `<div class="app-shell">
+    <header class="app-header"><div class="brand"><div class="brand-mark">${icon('grid')}</div><div><h1 id="main-title" tabindex="-1">자리바꾸기</h1><p>즐거운 교실, 새로운 자리로</p></div></div>
+      <button class="button help-button" id="help" type="button">${icon('help')}<span>사용 안내</span></button></header>
+    <main class="workspace">
+      <aside class="settings card" aria-label="자리 배정 설정">
+        <section><h2><span class="step-number">1</span>번호 범위 설정</h2>
+          <label for="student-count">학생 수 <span class="muted">(1 ~ 30명)</span></label>
+          <div class="number-range"><span class="range-start">1</span><span class="range-separator">~</span><input id="student-count" type="number" min="1" max="30" step="1" value="26" inputmode="numeric" required aria-describedby="count-description input-error" /><span class="student-total">총 <strong id="student-total">26</strong>명</span></div>
+          <p id="input-error" class="input-error" role="alert" hidden></p>
+          <p id="count-description" class="hint">${icon('info')}<span>1부터 지정한 수까지의 번호가<br>무작위로 배정됩니다.</span></p>
+        </section>
+        <section class="seat-settings"><h2><span class="step-number">2</span>좌석 선택 <span class="optional">선택 사항</span></h2>
+          <p class="section-description">사용하지 않는 좌석을 클릭해주세요.<br>한 번 더 누르면 다시 사용할 수 있어요.</p>
+          <button id="activate-all" type="button" class="button secondary">${icon('grid')}모두 활성화</button>
+        </section>
+        <section class="assignment-settings"><h2><span class="step-number">3</span>자리 배정</h2>
+          <div class="readiness"><span>배정할 학생 <strong id="summary-count">26명</strong></span><span>사용 가능 <strong id="available-count">36석</strong></span></div>
+          <div id="settings-error" class="settings-error" role="alert" hidden></div>
+          <button id="shuffle" type="button" class="button primary">${icon('shuffle')}<span>자리 섞기</span></button>
+          <p id="completion-notice" class="completion-notice" hidden>${icon('info')}<span>자리를 한 번 바꾼 뒤엔 자리를 다시 바꿀 수 없어요!</span></p>
+          <button id="reset" type="button" class="button reset-button">${icon('reset')}초기화</button>
+        </section>
+        <p class="settings-footnote">설정이 끝나면 자리 섞기를 눌러주세요.</p>
+      </aside>
+      <section class="classroom card" aria-labelledby="classroom-title">
+        <div class="classroom-heading"><div><h2 id="classroom-title">우리 반 좌석표</h2><span class="room-dimensions">6열 × 6행 · 총 36석</span></div><span id="phase-badge" class="phase-badge">좌석 설정 중</span></div>
+        <div class="room"><div class="front-label"><span></span>교실 앞쪽<span></span></div><div class="teacher-desk">${icon('desk')}교탁</div>
+          <div class="column-labels" aria-hidden="true">${Array.from({length: 6}, (_, i) => `<span>${i + 1}열</span>`).join('')}</div>
+          <div id="seat-grid" class="seat-grid" aria-label="6행 6열 교실 좌석"></div><div class="back-label">교실 뒤쪽</div>
+        </div>
+        <footer class="seat-footer"><div class="legend"><span><i class="legend-box"></i>활성 좌석</span><span><i class="legend-box inactive"></i>비활성 좌석</span></div><p class="seat-counter"><span>활성 <strong id="active-count">36</strong>개</span><span class="counter-divider">|</span><span>비활성 <strong id="inactive-count">0</strong>개</span></p></footer>
+      </section>
+    </main>
+    <footer class="page-footer"><span>우리 교실, 함께 만드는 새로운 하루</span><span id="status-message" role="status" aria-live="polite">학생 수와 사용할 좌석을 확인해주세요.</span></footer>
+  </div>
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title"><h2 id="help-title">자리바꾸기 사용 안내</h2><ol class="notice-list">${notices.map((notice) => `<li>${notice}</li>`).join('')}</ol><p class="hint">자리 배정이 끝나면 설정을 변경할 수 없습니다.<br>새로 시작하려면 페이지를 새로고침해주세요.</p><button id="close-help" type="button" class="button primary">확인</button></dialog>
+  <div id="countdown-overlay" class="countdown-overlay" role="dialog" aria-modal="true" aria-labelledby="countdown-title" tabindex="-1" hidden><div class="countdown-card"><p id="countdown-title">새로운 자리를 준비하고 있어요</p><div id="countdown-number" class="countdown-number" role="status" aria-live="assertive" aria-atomic="true">3</div><span>잠시 후 우리 반 자리가 공개됩니다.</span></div></div>`;
+}
+
+
+
+
+
+
+const app = document.querySelector('#app');
+let state = createInitialState();
+const $ = (selector) => document.querySelector(selector);
+
+function dispatch(action) {
+  state = reduceState(state, action);
+  renderState();
+}
+
+function renderState() {
+  const locked = state.phase !== 'setup';
+  const complete = state.phase === 'complete';
+  const active = state.seats.filter((seat) => seat.active).length;
+  for (const id of ['student-count', 'activate-all', 'shuffle', 'reset']) $(`#${id}`).disabled = locked;
+  $('#student-total').textContent = state.studentCount;
+  $('#summary-count').textContent = `${state.studentCount}명`;
+  $('#available-count').textContent = `${active}석`;
+  $('#available-count').classList.toggle('insufficient', active < state.studentCount);
+  $('#active-count').textContent = active;
+  $('#inactive-count').textContent = 36 - active;
+  $('#settings-error').textContent = state.error;
+  $('#settings-error').hidden = !state.error;
+  $('#completion-notice').hidden = !complete;
+  const shuffleButton = $('#shuffle');
+  if (shuffleButton.dataset.phase !== state.phase) {
+    shuffleButton.dataset.phase = state.phase;
+    shuffleButton.innerHTML = `${icon(complete ? 'check' : 'shuffle')}<span>${complete ? '자리 배정 완료' : state.phase === 'countdown' ? '자리 배정 중' : '자리 섞기'}</span>`;
+  }
+  $('#phase-badge').textContent = complete ? '배정 완료' : state.phase === 'countdown' ? '배정 중' : '좌석 설정 중';
+  $('#phase-badge').classList.toggle('complete', complete);
+  $('.settings-footnote').textContent = complete ? '새로 시작하려면 페이지를 새로고침해주세요.' : '설정이 끝나면 자리 섞기를 눌러주세요.';
+  $('#status-message').textContent = complete ? `${state.studentCount}명의 자리 배정이 완료되었습니다.` : active < state.studentCount ? `좌석이 ${state.studentCount - active}개 부족합니다.` : '학생 수와 사용할 좌석을 확인해주세요.';
+  const buttons = $('#seat-grid').children;
+  state.seats.forEach((seat, index) => {
+    const button = buttons[index];
+    button.disabled = locked;
+    button.className = `seat${seat.active ? '' : ' inactive'}${seat.student !== null ? ' assigned' : ''}`;
+    button.setAttribute('aria-pressed', String(seat.active));
+    const description = !seat.active ? '비활성' : seat.student !== null ? `${seat.student}번` : complete ? '빈자리' : '활성';
+    button.setAttribute('aria-label', `${seat.row + 1}행 ${seat.col + 1}열, ${description}`);
+    const content = !seat.active ? '<span class="seat-dash">—</span><span class="seat-caption">비활성</span>'
+      : seat.student !== null ? `<span class="seat-number">${seat.student}</span>`
+      : complete ? '<span class="seat-caption">빈자리</span>' : '<span class="empty-seat-mark" aria-hidden="true"></span>';
+    if (button.innerHTML !== content) button.innerHTML = content;
+  });
+  const counting = state.phase === 'countdown';
+  $('#countdown-overlay').hidden = !counting;
+  $('.app-shell').inert = counting;
+  if (counting) $('#countdown-number').textContent = state.countdown;
+}
+
+function validateInput() {
+  const input = $('#student-count');
+  const count = parseStudentCount(input.value);
+  const invalid = count === null;
+  input.setAttribute('aria-invalid', String(invalid));
+  $('#input-error').hidden = !invalid;
+  $('#input-error').textContent = invalid ? '1부터 30까지의 정수를 입력해주세요.' : '';
+  if (!invalid) dispatch({ type: 'SET_COUNT', value: count });
+  return !invalid;
+}
+
+function start() {
+  state = reduceState(state, { type: 'START' });
+  app.innerHTML = mainScreen();
+  for (const seat of state.seats) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.seatId = seat.id;
+    button.addEventListener('click', () => dispatch({ type: 'TOGGLE_SEAT', id: seat.id }));
+    $('#seat-grid').append(button);
+  }
+  const input = $('#student-count');
+  input.addEventListener('beforeinput', (event) => {
+    if (event.data && /[^0-9]/.test(event.data)) event.preventDefault();
+  });
+  input.addEventListener('input', () => {
+    // 빈 입력은 편집 중 허용하지만, 추첨 시에는 반드시 정수 검증을 통과해야 합니다.
+    if (/^\d+$/.test(input.value)) {
+      const numeric = Number(input.value);
+      if (numeric > 30) input.value = '30';
+      if (numeric < 1) input.value = '1';
+    }
+    validateInput();
+  });
+  input.addEventListener('change', () => { if (validateInput()) input.value = String(state.studentCount); });
+  $('#activate-all').addEventListener('click', () => dispatch({ type: 'ACTIVATE_ALL' }));
+  $('#reset').addEventListener('click', () => {
+    if (state.phase !== 'setup') return;
+    dispatch({ type: 'RESET' });
+    input.value = state.studentCount;
+    validateInput();
+  });
+  $('#shuffle').addEventListener('click', async () => {
+    if (state.phase !== 'setup') return;
+    if (!validateInput()) { input.focus(); return; }
+    dispatch({ type: 'SHUFFLE' });
+    if (state.phase !== 'countdown') return;
+    $('#countdown-overlay').focus();
+    await runCountdown((value) => {
+      if (state.countdown !== value) dispatch({ type: 'TICK', value });
+    });
+    dispatch({ type: 'COMPLETE' });
+    $('#main-title').focus({ preventScroll: true });
+  });
+  $('#help').addEventListener('click', () => $('#help-dialog').showModal());
+  $('#close-help').addEventListener('click', () => $('#help-dialog').close());
+  renderState();
+  $('#main-title').focus({ preventScroll: true });
+}
+
+app.innerHTML = welcomeScreen();
+$('#start').addEventListener('click', start, { once: true });
+
+    </script>
+  </body>
+</html>
