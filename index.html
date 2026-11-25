@@ -1153,6 +1153,62 @@ h1:focus {
   }
 }
 
+.number-range { align-items: end; gap: 8px; }
+.number-range > div { flex: 1; min-width: 0; }
+.number-range input { width: 100%; }
+.range-separator, .student-total { margin-bottom: 14px; }
+.assignment-actions { display: grid; gap: 8px; }
+.manual-controls { margin: 15px 0 8px; }
+.manual-controls select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid #cbd6e5;
+  border-radius: 9px;
+  background: white;
+  color: inherit;
+  font: inherit;
+}
+.selection-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #b4cef8;
+  border-radius: 12px;
+  background: #eff5ff;
+}
+.selection-panel strong { color: var(--blue); font-size: 1.35rem; }
+.selection-panel p { margin: 4px 0 0; font-size: .88rem; }
+.selection-actions, .export-actions, .dialog-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.selection-actions .button, .export-actions .button, .dialog-actions .button {
+  min-height: 36px;
+  padding: 6px 12px;
+}
+.export-actions { justify-content: flex-end; padding: 0 0 14px; }
+.dialog-actions { justify-content: flex-end; }
+.dialog-actions .button { width: auto; }
+.seat.selectable { border-color: #6293eb; cursor: pointer; }
+.seat.selected { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+@media print {
+  @page { margin: 12mm; }
+  html, body { background: white; }
+  .app-header, .settings, .page-footer, .selection-panel, .export-actions,
+  .phase-badge, .seat-footer, .column-labels { display: none !important; }
+  .app-shell, .workspace { display: block; max-width: none; padding: 0; }
+  .classroom { display: block; padding: 0; border: 0; box-shadow: none; break-inside: avoid; }
+  .classroom-heading { justify-content: center; }
+  .room { max-width: none; }
+  .seat { height: 20mm; border: 1px solid #525d70; opacity: 1; color: black; }
+  .seat.inactive { border-style: dashed; }
+  .seat.selected { outline: none; }
+  .seat-number { font-size: 18pt; }
+}
+
 
     </style>
   </head>
@@ -1225,16 +1281,35 @@ function createSeats() {
   }));
 }
 function createInitialState() {
-  return { phase: 'welcome', studentCount: 26, seats: createSeats(), countdown: null, error: '' };
+  return { phase: 'welcome', first: 1, last: 26, seats: createSeats(), countdown: null,
+    pending: null, manual: null, error: '' };
 }
-function reduceState(state, action) {
+
+function studentNumbers({ first, last }) {
+  return Array.from({ length: last - first + 1 }, (_, index) => first + index);
+}
+
+function unassignedNumbers(state) {
+  const assigned = new Set(state.seats.map((seat) => seat.student));
+  return studentNumbers(state).filter((number) => !assigned.has(number));
+}
+
+function canChooseSeat(state, seat) {
+  if (!seat.active) return false;
+  if (state.pending !== null) return seat.student === null;
+  if (state.manual === null || seat.student === state.manual) return false;
+  return seat.student === null || state.seats.some((item) => item.student === state.manual);
+}
+
+function reduceState(state, action, random = Math.random) {
   if (action.type === 'START' && state.phase === 'welcome') return { ...state, phase: 'setup' };
   if (state.phase === 'countdown') {
     if (action.type === 'TICK') return { ...state, countdown: action.value };
     if (action.type === 'COMPLETE') {
       try {
-        return { ...state, phase: 'complete', countdown: null,
-          seats: createSeatAssignments(state.studentCount, state.seats) };
+        const seats = createSeatAssignments(state.last - state.first + 1, state.seats, random)
+          .map((seat) => seat.student === null ? seat : { ...seat, student: seat.student + state.first - 1 });
+        return { ...state, phase: 'setup', countdown: null, seats };
       } catch (error) {
         return { ...state, phase: 'setup', countdown: null, error: error.message };
       }
@@ -1242,20 +1317,55 @@ function reduceState(state, action) {
     return state;
   }
   if (state.phase !== 'setup') return state;
+  const choosing = state.pending !== null || state.manual !== null;
   switch (action.type) {
-    case 'SET_COUNT':
-      return isValidStudentCount(action.value) ? { ...state, studentCount: action.value, error: '' } : state;
+    case 'SET_RANGE':
+      if (choosing || state.seats.some((seat) => seat.student !== null)) return state;
+      return isValidStudentCount(action.first) && isValidStudentCount(action.last) && action.first <= action.last
+        ? { ...state, first: action.first, last: action.last, error: '' } : state;
     case 'TOGGLE_SEAT':
+      if (choosing) return state;
       return { ...state, error: '', seats: state.seats.map((seat) =>
-        seat.id === action.id ? { ...seat, active: !seat.active } : seat) };
+        seat.id === action.id && seat.student === null ? { ...seat, active: !seat.active } : seat) };
     case 'ACTIVATE_ALL':
-      return { ...state, error: '', seats: state.seats.map((seat) => ({ ...seat, active: true })) };
-    case 'RESET': return { ...createInitialState(), phase: 'setup' };
+      return choosing ? state : { ...state, error: '', seats: state.seats.map((seat) => ({ ...seat, active: true })) };
+    case 'RESET':
+      return { ...state, pending: null, manual: null, error: '',
+        seats: state.seats.map((seat) => ({ ...seat, student: null })) };
     case 'ERROR': return { ...state, error: action.message };
+    case 'DRAW': {
+      if (choosing) return state;
+      const remaining = unassignedNumbers(state);
+      if (remaining.length === 0) return state;
+      if (!state.seats.some((seat) => seat.active && seat.student === null)) {
+        return { ...state, error: '사용 가능한 빈자리가 없습니다. 좌석을 더 활성화해주세요.' };
+      }
+      return { ...state, pending: remaining[Math.floor(random() * remaining.length)], error: '' };
+    }
+    case 'MANUAL':
+      return state.pending === null && studentNumbers(state).includes(action.student)
+        ? { ...state, manual: action.student, error: '' } : state;
+    case 'CANCEL_SELECTION':
+      return { ...state, pending: null, manual: null, error: '' };
+    case 'REMOVE_ASSIGNMENT':
+      if (state.manual === null) return state;
+      return { ...state, manual: null, seats: state.seats.map((seat) =>
+        seat.student === state.manual ? { ...seat, student: null } : seat) };
+    case 'CHOOSE_SEAT': {
+      const target = state.seats.find((seat) => seat.id === action.id);
+      if (!target || !canChooseSeat(state, target)) return state;
+      const student = state.pending ?? state.manual;
+      return { ...state, pending: null, manual: null, error: '', seats: state.seats.map((seat) => {
+        if (seat.id === target.id) return { ...seat, student };
+        if (seat.student === student) return { ...seat, student: target.student };
+        return seat;
+      }) };
+    }
     case 'SHUFFLE':
+      if (choosing || state.seats.some((seat) => seat.student !== null)) return state;
       try {
         // 카운트다운 전에 모든 조건을 검사하되, 실제 결과는 공개 순간 생성합니다.
-        validateAssignmentSettings(state.studentCount, state.seats);
+        validateAssignmentSettings(state.last - state.first + 1, state.seats);
         return { ...state, phase: 'countdown', countdown: 3, error: '' };
       } catch (error) { return { ...state, error: error.message }; }
     default: return state;
@@ -1288,10 +1398,10 @@ function icon(name, className = '') {
 }
 
 const notices = [
-  '학생 번호는 1번부터 최대 30번까지 설정할 수 있습니다.',
-  '사용하지 않는 자리는 좌석을 클릭하여 비활성화할 수 있습니다.',
-  '비활성화된 자리에는 학생 번호가 배정되지 않습니다.',
-  '자리 배정을 시작하기 전에 학생 수와 사용 가능한 좌석 수를 확인해주세요.',
+  '1~30번 안에서 시작 번호와 끝 번호를 정하세요.',
+  '사용하지 않는 빈자리는 클릭해서 비활성화할 수 있어요.',
+  '번호를 뽑으면 해당 학생이 원하는 빈자리를 고릅니다. 한 번에 전체 배정할 수도 있어요.',
+  '수동 배정으로 번호를 추가하거나, 이미 배정된 학생의 자리를 옮기고 교환할 수 있어요.',
 ];
 
 function welcomeScreen() {
@@ -1299,7 +1409,6 @@ function welcomeScreen() {
     <div class="brand-mark large">${icon('grid')}</div><p class="eyebrow">우리 교실의 새로운 시작</p>
     <h1>자리바꾸기 프로그램 실행하기</h1><p class="welcome-subtitle">자리바꾸기를 시작하기 전 아래 유의사항을 확인해주세요.</p>
     <ol class="notice-list">${notices.map((notice) => `<li>${notice}</li>`).join('')}</ol>
-    <div class="notice-highlight">${icon('info')}<p><strong>자리를 한 번 바꾼 뒤엔 자리를 다시 바꿀 수 없어요!</strong><br><span>설정을 모두 확인한 후 자리 배정을 시작해주세요.</span></p></div>
     <button type="button" class="button primary start-button" id="start">시작하기 ${icon('arrow')}</button>
     <p class="welcome-footer">즐거운 교실, 새로운 자리로</p>
   </div></main>`;
@@ -1312,36 +1421,47 @@ function mainScreen() {
     <main class="workspace">
       <aside class="settings card" aria-label="자리 배정 설정">
         <section><h2><span class="step-number">1</span>번호 범위 설정</h2>
-          <label for="student-count">학생 수 <span class="muted">(1 ~ 30명)</span></label>
-          <div class="number-range"><span class="range-start">1</span><span class="range-separator">~</span><input id="student-count" type="number" min="1" max="30" step="1" value="26" inputmode="numeric" required aria-describedby="count-description input-error" /><span class="student-total">총 <strong id="student-total">26</strong>명</span></div>
+          <div class="number-range">
+            <div><label for="first-number">시작 번호</label><input id="first-number" type="number" min="1" max="30" step="1" value="1" inputmode="numeric" required aria-describedby="input-error"></div>
+            <span class="range-separator" aria-hidden="true">~</span>
+            <div><label for="last-number">끝 번호</label><input id="last-number" type="number" min="1" max="30" step="1" value="26" inputmode="numeric" required aria-describedby="input-error"></div>
+            <span class="student-total">총 <strong id="student-total">26</strong>명</span>
+          </div>
           <p id="input-error" class="input-error" role="alert" hidden></p>
-          <p id="count-description" class="hint">${icon('info')}<span>1부터 지정한 수까지의 번호가<br>무작위로 배정됩니다.</span></p>
         </section>
         <section class="seat-settings"><h2><span class="step-number">2</span>좌석 선택 <span class="optional">선택 사항</span></h2>
           <p class="section-description">사용하지 않는 좌석을 클릭해주세요.<br>한 번 더 누르면 다시 사용할 수 있어요.</p>
           <button id="activate-all" type="button" class="button secondary">${icon('grid')}모두 활성화</button>
         </section>
         <section class="assignment-settings"><h2><span class="step-number">3</span>자리 배정</h2>
-          <div class="readiness"><span>배정할 학생 <strong id="summary-count">26명</strong></span><span>사용 가능 <strong id="available-count">36석</strong></span></div>
+          <div class="readiness"><span>미배정 <strong id="summary-count">26명</strong></span><span>빈자리 <strong id="available-count">36석</strong></span></div>
           <div id="settings-error" class="settings-error" role="alert" hidden></div>
-          <button id="shuffle" type="button" class="button primary">${icon('shuffle')}<span>자리 섞기</span></button>
-          <p id="completion-notice" class="completion-notice" hidden>${icon('info')}<span>자리를 한 번 바꾼 뒤엔 자리를 다시 바꿀 수 없어요!</span></p>
-          <button id="reset" type="button" class="button reset-button">${icon('reset')}초기화</button>
+          <div class="assignment-actions">
+            <button id="draw" type="button" class="button primary">${icon('shuffle')}번호 추첨</button>
+            <button id="shuffle" type="button" class="button secondary">전체 무작위 배정</button>
+          </div>
+          <div class="manual-controls"><label for="manual-student">선생님 수동 배정</label><select id="manual-student"><option value="">학생 번호 선택</option></select></div>
+          <button id="reset" type="button" class="button reset-button">${icon('reset')}배정 초기화</button>
         </section>
-        <p class="settings-footnote">설정이 끝나면 자리 섞기를 눌러주세요.</p>
       </aside>
       <section class="classroom card" aria-labelledby="classroom-title">
         <div class="classroom-heading"><div><h2 id="classroom-title">우리 반 좌석표</h2><span class="room-dimensions">6열 × 6행 · 총 36석</span></div><span id="phase-badge" class="phase-badge">좌석 설정 중</span></div>
+        <div id="selection-panel" class="selection-panel" hidden>
+          <div id="selection-status" role="status" aria-live="polite" tabindex="-1"><strong id="chosen-number"></strong><p id="selection-instructions"></p></div>
+          <div class="selection-actions"><button id="remove-assignment" class="button secondary" type="button" hidden>배정 해제</button><button id="cancel-selection" class="button secondary" type="button">선택 취소</button></div>
+        </div>
         <div class="room"><div class="front-label"><span></span>교실 앞쪽<span></span></div><div class="teacher-desk">${icon('desk')}교탁</div>
           <div class="column-labels" aria-hidden="true">${Array.from({length: 6}, (_, i) => `<span>${i + 1}열</span>`).join('')}</div>
           <div id="seat-grid" class="seat-grid" aria-label="6행 6열 교실 좌석"></div><div class="back-label">교실 뒤쪽</div>
         </div>
         <footer class="seat-footer"><div class="legend"><span><i class="legend-box"></i>활성 좌석</span><span><i class="legend-box inactive"></i>비활성 좌석</span></div><p class="seat-counter"><span>활성 <strong id="active-count">36</strong>개</span><span class="counter-divider">|</span><span>비활성 <strong id="inactive-count">0</strong>개</span></p></footer>
+        <div class="export-actions"><button id="print-seats" class="button secondary" type="button">인쇄 / PDF 저장</button><button id="save-seats" class="button secondary" type="button">좌석표 저장 (HTML)</button></div>
       </section>
     </main>
     <footer class="page-footer"><span>우리 교실, 함께 만드는 새로운 하루</span><span id="status-message" role="status" aria-live="polite">학생 수와 사용할 좌석을 확인해주세요.</span></footer>
   </div>
-  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title"><h2 id="help-title">자리바꾸기 사용 안내</h2><ol class="notice-list">${notices.map((notice) => `<li>${notice}</li>`).join('')}</ol><p class="hint">자리 배정이 끝나면 설정을 변경할 수 없습니다.<br>새로 시작하려면 페이지를 새로고침해주세요.</p><button id="close-help" type="button" class="button primary">확인</button></dialog>
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title"><h2 id="help-title">자리바꾸기 사용 안내</h2><ol class="notice-list">${notices.map((notice) => `<li>${notice}</li>`).join('')}</ol><p class="hint">배정 초기화를 누르면 학생 자리만 지워지고 번호 범위와 좌석 사용 설정은 유지됩니다.</p><button id="close-help" type="button" class="button primary">확인</button></dialog>
+  <dialog id="reset-dialog" class="help-dialog" aria-labelledby="reset-title"><h2 id="reset-title">자리 배정을 초기화할까요?</h2><p>배정된 자리와 추첨 중인 번호가 지워집니다. 번호 범위와 좌석 사용 설정은 유지됩니다.</p><form method="dialog" class="dialog-actions"><button class="button secondary" value="cancel" autofocus>취소</button><button class="button primary" value="reset">초기화</button></form></dialog>
   <div id="countdown-overlay" class="countdown-overlay" role="dialog" aria-modal="true" aria-labelledby="countdown-title" tabindex="-1" hidden><div class="countdown-card"><p id="countdown-title">새로운 자리를 준비하고 있어요</p><div id="countdown-number" class="countdown-number" role="status" aria-live="assertive" aria-atomic="true">3</div><span>잠시 후 우리 반 자리가 공개됩니다.</span></div></div>`;
 }
 
@@ -1351,8 +1471,8 @@ function mainScreen() {
 
 
 const app = document.querySelector('#app');
-let state = createInitialState();
 const $ = (selector) => document.querySelector(selector);
+let state = createInitialState();
 
 function dispatch(action) {
   state = reduceState(state, action);
@@ -1360,56 +1480,118 @@ function dispatch(action) {
 }
 
 function renderState() {
-  const locked = state.phase !== 'setup';
-  const complete = state.phase === 'complete';
+  const counting = state.phase === 'countdown';
+  const chosen = state.pending ?? state.manual;
+  const choosing = chosen !== null;
+  const remaining = unassignedNumbers(state).length;
+  const total = state.last - state.first + 1;
+  const assigned = total - remaining;
   const active = state.seats.filter((seat) => seat.active).length;
-  for (const id of ['student-count', 'activate-all', 'shuffle', 'reset']) $(`#${id}`).disabled = locked;
-  $('#student-total').textContent = state.studentCount;
-  $('#summary-count').textContent = `${state.studentCount}명`;
-  $('#available-count').textContent = `${active}석`;
-  $('#available-count').classList.toggle('insufficient', active < state.studentCount);
+  const free = active - assigned;
+  const manualAssigned = state.manual !== null && state.seats.some((seat) => seat.student === state.manual);
+
+  for (const selector of ['#first-number', '#last-number']) $(selector).disabled = counting || choosing || assigned > 0;
+  $('#activate-all').disabled = counting || choosing || active === state.seats.length;
+  $('#draw').disabled = counting || choosing || remaining === 0;
+  $('#shuffle').disabled = counting || choosing || assigned > 0;
+  $('#reset').disabled = counting || (!choosing && assigned === 0);
+  $('#print-seats').disabled = $('#save-seats').disabled = counting || assigned === 0;
+  $('#student-total').textContent = total;
+  $('#summary-count').textContent = `${remaining}명`;
+  $('#available-count').textContent = `${free}석`;
+  $('#available-count').classList.toggle('insufficient', free < remaining);
   $('#active-count').textContent = active;
-  $('#inactive-count').textContent = 36 - active;
+  $('#inactive-count').textContent = state.seats.length - active;
   $('#settings-error').textContent = state.error;
   $('#settings-error').hidden = !state.error;
-  $('#completion-notice').hidden = !complete;
-  const shuffleButton = $('#shuffle');
-  if (shuffleButton.dataset.phase !== state.phase) {
-    shuffleButton.dataset.phase = state.phase;
-    shuffleButton.innerHTML = `${icon(complete ? 'check' : 'shuffle')}<span>${complete ? '자리 배정 완료' : state.phase === 'countdown' ? '자리 배정 중' : '자리 섞기'}</span>`;
+
+  const select = $('#manual-student');
+  const range = `${state.first}-${state.last}`;
+  if (select.dataset.range !== range) {
+    select.dataset.range = range;
+    select.replaceChildren(new Option('학생 번호 선택', ''),
+      ...studentNumbers(state).map((number) => new Option(`${number}번`, number)));
   }
-  $('#phase-badge').textContent = complete ? '배정 완료' : state.phase === 'countdown' ? '배정 중' : '좌석 설정 중';
+  select.value = state.manual ?? '';
+  select.disabled = counting || state.pending !== null;
+
+  $('#selection-panel').hidden = !choosing;
+  $('#chosen-number').textContent = choosing ? `${chosen}번` : '';
+  $('#selection-instructions').textContent = state.pending !== null
+    ? '추첨된 학생이 원하는 빈자리를 고르세요.'
+    : manualAssigned ? '빈자리로 옮기거나 다른 학생의 자리를 눌러 서로 바꾸세요.'
+      : '배정할 빈자리를 고르세요.';
+  $('#remove-assignment').hidden = !manualAssigned;
+
+  const complete = remaining === 0;
+  $('#phase-badge').textContent = counting ? '배정 중' : choosing ? '자리 선택 중' : complete ? '배정 완료'
+    : assigned ? `${assigned} / ${total}명 배정` : '좌석 설정 중';
   $('#phase-badge').classList.toggle('complete', complete);
-  $('.settings-footnote').textContent = complete ? '새로 시작하려면 페이지를 새로고침해주세요.' : '설정이 끝나면 자리 섞기를 눌러주세요.';
-  $('#status-message').textContent = complete ? `${state.studentCount}명의 자리 배정이 완료되었습니다.` : active < state.studentCount ? `좌석이 ${state.studentCount - active}개 부족합니다.` : '학생 수와 사용할 좌석을 확인해주세요.';
+  $('#status-message').textContent = complete ? `${total}명의 자리 배정이 완료되었습니다.`
+    : assigned ? `${assigned}명 배정 · ${remaining}명 남음` : '번호 범위와 사용할 좌석을 확인해주세요.';
+
   const buttons = $('#seat-grid').children;
   state.seats.forEach((seat, index) => {
     const button = buttons[index];
-    button.disabled = locked;
-    button.className = `seat${seat.active ? '' : ' inactive'}${seat.student !== null ? ' assigned' : ''}`;
-    button.setAttribute('aria-pressed', String(seat.active));
-    const description = !seat.active ? '비활성' : seat.student !== null ? `${seat.student}번` : complete ? '빈자리' : '활성';
+    const selectable = choosing && canChooseSeat(state, seat);
+    const selected = state.manual !== null && seat.student === state.manual;
+    button.disabled = counting || (choosing ? !selectable : seat.student !== null);
+    button.classList.toggle('inactive', !seat.active);
+    button.classList.toggle('assigned', seat.student !== null);
+    button.classList.toggle('selectable', selectable);
+    button.classList.toggle('selected', selected);
+    if (!choosing && seat.student === null) button.setAttribute('aria-pressed', String(seat.active));
+    else button.removeAttribute('aria-pressed');
+    const description = !seat.active ? '비활성' : seat.student === null ? '빈자리' : `${seat.student}번`;
     button.setAttribute('aria-label', `${seat.row + 1}행 ${seat.col + 1}열, ${description}`);
-    const content = !seat.active ? '<span class="seat-dash">—</span><span class="seat-caption">비활성</span>'
-      : seat.student !== null ? `<span class="seat-number">${seat.student}</span>`
-      : complete ? '<span class="seat-caption">빈자리</span>' : '<span class="empty-seat-mark" aria-hidden="true"></span>';
-    if (button.innerHTML !== content) button.innerHTML = content;
+    button.firstElementChild.textContent = !seat.active ? '비활성' : seat.student ?? '빈자리';
+    button.firstElementChild.className = seat.student === null ? 'seat-caption' : 'seat-number';
   });
-  const counting = state.phase === 'countdown';
+
   $('#countdown-overlay').hidden = !counting;
   $('.app-shell').inert = counting;
   if (counting) $('#countdown-number').textContent = state.countdown;
 }
 
-function validateInput() {
-  const input = $('#student-count');
-  const count = parseStudentCount(input.value);
-  const invalid = count === null;
-  input.setAttribute('aria-invalid', String(invalid));
-  $('#input-error').hidden = !invalid;
-  $('#input-error').textContent = invalid ? '1부터 30까지의 정수를 입력해주세요.' : '';
-  if (!invalid) dispatch({ type: 'SET_COUNT', value: count });
-  return !invalid;
+function validateRange() {
+  const firstInput = $('#first-number');
+  const lastInput = $('#last-number');
+  const first = parseStudentCount(firstInput.value);
+  const last = parseStudentCount(lastInput.value);
+  const reversed = first !== null && last !== null && first > last;
+  const valid = first !== null && last !== null && !reversed;
+  firstInput.setAttribute('aria-invalid', String(first === null || reversed));
+  lastInput.setAttribute('aria-invalid', String(last === null || reversed));
+  $('#input-error').hidden = valid;
+  $('#input-error').textContent = valid ? '' : reversed ? '끝 번호는 시작 번호 이상이어야 합니다.'
+    : '시작 번호와 끝 번호를 1~30 사이 정수로 입력하세요.';
+  if (valid && (first !== state.first || last !== state.last)) dispatch({ type: 'SET_RANGE', first, last });
+  return valid;
+}
+
+function saveSeats() {
+  const cells = state.seats.map((seat) => {
+    const label = !seat.active ? '비활성' : seat.student === null ? '빈자리' : `${seat.student}번`;
+    return `<div class="seat${seat.active ? '' : ' inactive'}">${label}</div>`;
+  }).join('');
+  const html = `<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우리 반 좌석표</title><style>
+body { max-width: 800px; margin: 32px auto; padding: 0 16px; font-family: system-ui, sans-serif; }
+h1, p { text-align: center; } button { display: block; margin: 20px auto; font: inherit; }
+.grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.seat { border: 1px solid #496483; border-radius: 6px; padding: 12px 0; text-align: center; }
+.inactive { color: #555; background: #eee; border-style: dashed; }
+@media print { button { display: none; } .grid { break-inside: avoid; } }
+</style><h1>우리 반 좌석표</h1><p>교실 앞쪽 · 교탁</p><div class="grid">${cells}</div>
+<p>교실 뒤쪽</p><button type="button" onclick="window.print()">인쇄 / PDF 저장</button></html>`;
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+  const download = document.createElement('a');
+  download.href = url;
+  download.download = '우리-반-좌석표.html';
+  document.body.append(download);
+  download.click();
+  download.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function start() {
@@ -1418,34 +1600,53 @@ function start() {
   for (const seat of state.seats) {
     const button = document.createElement('button');
     button.type = 'button';
+    button.className = 'seat';
     button.dataset.seatId = seat.id;
-    button.addEventListener('click', () => dispatch({ type: 'TOGGLE_SEAT', id: seat.id }));
+    button.append(document.createElement('span'));
+    button.addEventListener('click', () => {
+      const choosing = state.pending !== null || state.manual !== null;
+      dispatch({ type: choosing ? 'CHOOSE_SEAT' : 'TOGGLE_SEAT', id: seat.id });
+      if (choosing) {
+        const nextAction = $('#draw').disabled ? $('#manual-student') : $('#draw');
+        nextAction.focus({ preventScroll: true });
+      }
+    });
     $('#seat-grid').append(button);
   }
-  const input = $('#student-count');
-  input.addEventListener('beforeinput', (event) => {
-    if (event.data && /[^0-9]/.test(event.data)) event.preventDefault();
-  });
-  input.addEventListener('input', () => {
-    // 빈 입력은 편집 중 허용하지만, 추첨 시에는 반드시 정수 검증을 통과해야 합니다.
-    if (/^\d+$/.test(input.value)) {
-      const numeric = Number(input.value);
-      if (numeric > 30) input.value = '30';
-      if (numeric < 1) input.value = '1';
-    }
-    validateInput();
-  });
-  input.addEventListener('change', () => { if (validateInput()) input.value = String(state.studentCount); });
+  for (const selector of ['#first-number', '#last-number']) $(selector).addEventListener('input', validateRange);
   $('#activate-all').addEventListener('click', () => dispatch({ type: 'ACTIVATE_ALL' }));
+  $('#draw').addEventListener('click', () => {
+    if (!validateRange()) return;
+    dispatch({ type: 'DRAW' });
+    if (state.pending !== null) $('#selection-status').focus();
+  });
+  $('#manual-student').addEventListener('change', (event) => {
+    if (!validateRange()) { event.target.value = state.manual ?? ''; return; }
+    const value = event.target.value;
+    dispatch(value ? { type: 'MANUAL', student: Number(value) } : { type: 'CANCEL_SELECTION' });
+    if (state.manual !== null) $('#selection-status').focus();
+  });
+  $('#cancel-selection').addEventListener('click', () => {
+    const origin = state.pending !== null ? $('#draw') : $('#manual-student');
+    dispatch({ type: 'CANCEL_SELECTION' });
+    origin.focus();
+  });
+  $('#remove-assignment').addEventListener('click', () => {
+    dispatch({ type: 'REMOVE_ASSIGNMENT' });
+    $('#manual-student').focus();
+  });
   $('#reset').addEventListener('click', () => {
-    if (state.phase !== 'setup') return;
-    dispatch({ type: 'RESET' });
-    input.value = state.studentCount;
-    validateInput();
+    $('#reset-dialog').returnValue = '';
+    $('#reset-dialog').showModal();
+  });
+  $('#reset-dialog').addEventListener('close', (event) => {
+    if (event.currentTarget.returnValue === 'reset') {
+      dispatch({ type: 'RESET' });
+      (validateRange() ? $('#draw') : $('#first-number')).focus();
+    }
   });
   $('#shuffle').addEventListener('click', async () => {
-    if (state.phase !== 'setup') return;
-    if (!validateInput()) { input.focus(); return; }
+    if (!validateRange()) return;
     dispatch({ type: 'SHUFFLE' });
     if (state.phase !== 'countdown') return;
     $('#countdown-overlay').focus();
@@ -1455,6 +1656,8 @@ function start() {
     dispatch({ type: 'COMPLETE' });
     $('#main-title').focus({ preventScroll: true });
   });
+  $('#print-seats').addEventListener('click', () => window.print());
+  $('#save-seats').addEventListener('click', saveSeats);
   $('#help').addEventListener('click', () => $('#help-dialog').showModal());
   $('#close-help').addEventListener('click', () => $('#help-dialog').close());
   renderState();
