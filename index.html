@@ -1509,6 +1509,12 @@ function seatLoginDialog() {
   return document.querySelector('#seat-login');
 }
 
+function openSeatLogin(enter) {
+  const dialog = seatLoginDialog();
+  if (!dialog || seatUser) { enter(); return; }
+  if (!dialog.open) dialog.showModal();
+}
+
 function renderSeatAccount() {
   const button = document.querySelector('#seat-account');
   const status = document.querySelector('#seat-account-status');
@@ -1585,7 +1591,6 @@ async function setupSeatLogin(enter) {
   </dialog>`);
   const dialog = seatLoginDialog();
   dialog.querySelector('#seat-guest').onclick = () => { dialog.close(); enter(); };
-  dialog.showModal();
 
   try {
     const sdk = 'https://www.gstatic.com/firebasejs/13.4.0';
@@ -1833,8 +1838,9 @@ function start() {
 }
 
 app.innerHTML = welcomeScreen();
-$('#start').addEventListener('click', start, { once: true });
-void setupSeatLogin(() => { if (state.phase === 'welcome') start(); });
+const enterSeating = () => { if (state.phase === 'welcome') start(); };
+$('#start').addEventListener('click', () => openSeatLogin(enterSeating));
+void setupSeatLogin(enterSeating);
 
     </script>
   </body>
