@@ -3,7 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#2463eb" />
+    <meta name="theme-color" content="#f3f6fa" />
+    <script>
+      (() => {
+        let saved;
+        try { saved = localStorage.getItem('change-seat-theme'); } catch {}
+        const dark = saved === 'dark' || (saved !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        document.querySelector('meta[name="theme-color"]').content = dark ? '#0f1725' : '#f3f6fa';
+      })();
+    </script>
     <meta name="description" content="우리 교실의 새로운 자리. 학생 수와 좌석을 설정하고 간편하게 자리를 배정하세요." />
     <title>자리바꾸기 · 즐거운 교실, 새로운 자리로</title>
     <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTYiIGZpbGw9IiMyNDYzZWIiLz48ZyBmaWxsPSJ3aGl0ZSI+PHJlY3QgeD0iMTUiIHk9IjE1IiB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHJ4PSI0Ii8+PHJlY3QgeD0iMzUiIHk9IjE1IiB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHJ4PSI0Ii8+PHJlY3QgeD0iMTUiIHk9IjM1IiB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHJ4PSI0Ii8+PHJlY3QgeD0iMzUiIHk9IjM1IiB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHJ4PSI0Ii8+PC9nPjwvc3ZnPgo=" type="image/svg+xml" />
@@ -168,6 +177,10 @@ h1:focus {
 }
 
 .header-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.welcome-actions { display: flex; justify-content: flex-end; margin: -8px 0 12px; }
+.theme-toggle { min-height: 40px; padding: 6px 11px; font-size: 13px; gap: 6px; }
+.theme-toggle .icon { width: 17px; height: 17px; }
+.theme-toggle[aria-pressed="true"] { border-color: var(--blue); }
 .naver-button { padding: 6px 12px; }
 .naver-status { font-size: 13px; }
 .naver-status:empty { display: none; }
@@ -1229,17 +1242,82 @@ h1:focus {
 #roster-print-state { align-self: center; }
 @media (max-width: 460px) { .roster-fields { grid-template-columns: 1fr; } }
 
+@media screen {
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    color: #e8effb;
+    background: #0f1725;
+    --dark-surface: #182438;
+    --dark-raised: #22324a;
+    --muted: #b1c0d7;
+    --line: #344761;
+    --blue: #8cb6ff;
+  }
+
+  [data-theme="dark"] :is(.card, .welcome-card, .help-dialog, .seat-login, .countdown-card) {
+    background: var(--dark-surface);
+    color: inherit;
+    border-color: var(--line);
+  }
+
+  [data-theme="dark"] .primary { background: #285dcb; color: white; }
+  [data-theme="dark"] .primary:hover:not(:disabled) { background: #336bd9; }
+  [data-theme="dark"] :is(.primary, .secondary, .reset-button):disabled { background: #25344b; color: #a3b1c7; }
+  [data-theme="dark"] .secondary { background: var(--dark-raised); color: #e1ebfb; border-color: #4b6282; }
+  [data-theme="dark"] .secondary:hover:not(:disabled),
+  [data-theme="dark"] :is(.help-button,.reset-button):hover:not(:disabled) { background: #304666; border-color: #7697c6; }
+  [data-theme="dark"] .theme-toggle[aria-pressed="true"] { background: #264570; border-color: var(--blue); }
+
+  [data-theme="dark"] :is(.help-button, .reset-button, .seat-login p, .logout-dialog p, .roster-dialog > p, .roster-dialog #seat-roster-status,
+    .notice-list li, .welcome-footer, .eyebrow, .room-dimensions, .range-separator, .optional, .legend, .seat-counter, .page-footer,
+    .front-label, .back-label, .column-labels, .settings-footnote, .countdown-card > span, .readiness strong, #inactive-count) { color: var(--muted); }
+
+  [data-theme="dark"] :is(.brand-mark, .step-number, .phase-badge, .selection-panel, .notice-highlight, .completion-notice) {
+    background: #203653;
+    color: #c4dbff;
+    border-color: #44648d;
+  }
+  [data-theme="dark"] .phase-badge.complete { color: #aaf0c8; background: #1e4438; }
+  [data-theme="dark"] :is(.hint, .teacher-desk),
+  [data-theme="dark"] .notice-list li::before { background: var(--dark-raised); color: var(--muted); border-color: var(--line); }
+  [data-theme="dark"] .front-label span { background: var(--line); }
+
+  [data-theme="dark"] :is(.number-range input, .manual-controls select, .roster-fields input) {
+    background: #111b2c;
+    color: #e8effb;
+    border-color: #637999;
+  }
+  [data-theme="dark"] :is(.number-range input, .manual-controls select):disabled { background: #25344b; color: var(--muted); }
+  [data-theme="dark"] .number-range input[aria-invalid="true"] { border-color: #f49797; }
+  [data-theme="dark"] :is(.settings-error, .input-error, .readiness .insufficient, .logout-dialog #seat-logout-error) { color: #ffb8b3; }
+  [data-theme="dark"] .settings-error { background: #492930; border-color: #814753; }
+
+  [data-theme="dark"] :is(.seat, .legend-box) { background: #223753; color: #edf5ff; border-color: #547aab; }
+  [data-theme="dark"] .seat.assigned { background: #294977; border-color: #80aafa; }
+  [data-theme="dark"] .seat:hover:not(:disabled) { background: #345582; border-color: var(--blue); }
+  [data-theme="dark"] :is(.seat.inactive, .legend-box.inactive) { background: #253044; color: #a3b0c4; border-color: #53607a; }
+  [data-theme="dark"] .seat.inactive:hover:not(:disabled) { background: #313d53; }
+  [data-theme="dark"] .empty-seat-mark { background: #6e8fbb; }
+  [data-theme="dark"] .seat.selectable { border-color: #9dbfff; }
+  [data-theme="dark"] ::backdrop { background: #070d17bd; }
+}
+
+@media (max-width: 560px) {
+  .app-header { flex-wrap: wrap; gap: 9px; }
+  .header-actions { width: 100%; }
+}
+
 @media print {
   @page { margin: 12mm; }
-  html, body { background: white; }
+  :root, body { color-scheme: light; background: white; color: #18253b; }
   .app-header, .settings, .page-footer, .selection-panel, .export-actions,
   .phase-badge, .seat-footer, .column-labels { display: none !important; }
   .app-shell, .workspace { display: block; max-width: none; padding: 0; }
   .classroom { display: block; padding: 0; border: 0; box-shadow: none; break-inside: avoid; }
   .classroom-heading { justify-content: center; }
   .room { max-width: none; }
-  .seat { height: 20mm; border: 1px solid #525d70; opacity: 1; color: black; }
-  .seat.inactive { border-style: dashed; }
+  .classroom .seat-grid .seat { height: 20mm; border: 1px solid #525d70; opacity: 1; color: black; background: white; transition: none; }
+  .classroom .seat-grid .seat.inactive { border-style: dashed; }
   .seat.selected { outline: none; }
   .seat-number { font-size: 18pt; }
   .seat.assigned .seat-number::after { content: '번'; font-size: 10pt; }
@@ -1430,8 +1508,13 @@ function icon(name, className = '') {
     check: '<path d="m5 12 4 4L19 6"/>',
     desk: '<path d="M3 8h18v6H3zm3 6v6m12-6v6M6 4h12"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .7-1.5 1.2-1.5 2m0 3v.1"/>',
+    moon: '<path d="M20.9 13.3A9 9 0 0 1 10.7 3.1 9 9 0 1 0 20.9 13.3Z"/>',
   };
   return `<svg class="icon ${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.grid}</svg>`;
+}
+
+function themeButton() {
+  return `<button class="button secondary theme-toggle" type="button" data-theme-toggle aria-pressed="false">${icon('moon')}<span>다크 모드</span></button>`;
 }
 
 const notices = [
@@ -1443,6 +1526,7 @@ const notices = [
 
 function welcomeScreen() {
   return `<main class="welcome"><div class="welcome-card">
+    <div class="welcome-actions">${themeButton()}</div>
     <div class="brand-mark large">${icon('grid')}</div><p class="eyebrow">우리 교실의 새로운 시작</p>
     <h1>자리바꾸기 프로그램 실행하기</h1><p class="welcome-subtitle">자리바꾸기를 시작하기 전 아래 유의사항을 확인해주세요.</p>
     <ol class="notice-list">${notices.map((notice) => `<li>${notice}</li>`).join('')}</ol>
@@ -1455,6 +1539,7 @@ function mainScreen() {
   return `<div class="app-shell">
     <header class="app-header"><div class="brand"><div class="brand-mark">${icon('grid')}</div><div><h1 id="main-title" tabindex="-1">자리바꾸기</h1><p>즐거운 교실, 새로운 자리로</p></div></div>
       <div class="header-actions">
+        ${themeButton()}
         <span id="seat-account-status" class="naver-status" role="status"></span>
         <button class="button secondary naver-button" id="open-seat-roster" type="button" hidden>학생 이름</button>
         <button class="button secondary naver-button" id="seat-account" type="button" hidden>로그인</button>
@@ -1843,6 +1928,21 @@ const app = document.querySelector('#app');
 const $ = (selector) => document.querySelector(selector);
 let state = createInitialState();
 
+function renderThemeToggle() {
+  const button = $('[data-theme-toggle]');
+  button.setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'dark'));
+}
+
+app.addEventListener('click', (event) => {
+  if (!event.target.closest('[data-theme-toggle]')) return;
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  const theme = dark ? 'dark' : 'light';
+  document.documentElement.dataset.theme = theme;
+  $('meta[name="theme-color"]').content = dark ? '#0f1725' : '#f3f6fa';
+  try { localStorage.setItem('change-seat-theme', theme); } catch {}
+  renderThemeToggle();
+});
+
 function dispatch(action) {
   state = reduceState(state, action);
   renderState();
@@ -1968,6 +2068,7 @@ h1, p { text-align: center; } button { display: block; margin: 20px auto; font: 
 function start() {
   state = reduceState(state, { type: 'START' });
   app.innerHTML = mainScreen();
+  renderThemeToggle();
   bindSeatAccount();
   for (const seat of state.seats) {
     const button = document.createElement('button');
@@ -2040,6 +2141,7 @@ function start() {
 }
 
 app.innerHTML = welcomeScreen();
+renderThemeToggle();
 const enterSeating = () => { if (state.phase === 'welcome') start(); };
 $('#start').addEventListener('click', () => openSeatLogin(enterSeating));
 void setupSeatLogin(enterSeating);
