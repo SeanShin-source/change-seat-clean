@@ -171,6 +171,11 @@ h1:focus {
 .naver-button { padding: 6px 12px; }
 .naver-status { font-size: 13px; }
 .naver-status:empty { display: none; }
+.logout-dialog { max-width: 380px; }
+.logout-dialog p { margin: 10px 0; color: #526582; font-size: 14px; }
+.logout-dialog #seat-logout-error { color: #a82437; }
+.logout-actions { display: flex; gap: 8px; }
+.logout-actions .button { flex: 1; margin-top: 10px; }
 
 .seat-login { width: min(384px, calc(100% - 32px)); padding: 26px; border: 1px solid #d9e3ee; border-radius: 20px; color: #18253b; box-shadow: 0 18px 65px #10233b33; }
 .seat-login::backdrop { background: #17274170; }
@@ -1497,6 +1502,12 @@ function mainScreen() {
     </main>
     <footer class="page-footer"><span>우리 교실, 함께 만드는 새로운 하루</span><span id="status-message" role="status" aria-live="polite">학생 수와 사용할 좌석을 확인해주세요.</span></footer>
   </div>
+  <dialog id="seat-logout" class="help-dialog logout-dialog" aria-labelledby="seat-logout-title">
+    <h2 id="seat-logout-title">로그아웃 하시겠습니까?</h2>
+    <p>처음 화면으로 돌아가고 현재 자리 배정은 초기화돼요.</p>
+    <p id="seat-logout-error" role="alert" hidden></p>
+    <div class="logout-actions"><button id="seat-logout-no" class="button secondary" type="button" autofocus>아니오</button><button id="seat-logout-yes" class="button primary" type="button">예</button></div>
+  </dialog>
   <dialog id="seat-roster" class="help-dialog roster-dialog" aria-labelledby="seat-roster-title">
     <h2 id="seat-roster-title">번호별 학생 이름</h2>
     <p>저장한 이름은 좌석표를 인쇄할 때 자동으로 표시돼요. 지우려면 해당 칸을 비운 뒤 저장하세요.</p>
@@ -1724,11 +1735,30 @@ function requestNaverToken() {
 function bindSeatAccount() {
   const button = document.querySelector('#seat-account');
   if (!button || !seatLoginDialog()) return;
+  const dialog = document.querySelector('#seat-logout');
+  const yes = dialog.querySelector('#seat-logout-yes');
+  const no = dialog.querySelector('#seat-logout-no');
+  const error = dialog.querySelector('#seat-logout-error');
   button.hidden = false;
-  button.onclick = async () => {
+  button.onclick = () => {
     if (!seatUser) { seatLoginDialog().showModal(); return; }
-    try { await seatAuthSdk.signOut(seatAuth); }
-    catch { document.querySelector('#seat-account-status').textContent = '로그아웃하지 못했어요.'; }
+    error.hidden = true;
+    dialog.showModal();
+  };
+  no.onclick = () => dialog.close();
+  dialog.addEventListener('cancel', (event) => { if (yes.disabled) event.preventDefault(); });
+  yes.onclick = async () => {
+    yes.disabled = no.disabled = true;
+    error.hidden = true;
+    try {
+      await seatAuthSdk.signOut(seatAuth);
+      location.reload();
+    } catch {
+      error.textContent = '로그아웃하지 못했어요. 다시 시도해주세요.';
+      error.hidden = false;
+      yes.disabled = no.disabled = false;
+      yes.focus();
+    }
   };
   renderSeatAccount();
 }
