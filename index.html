@@ -181,6 +181,20 @@ h1:focus {
 .theme-toggle { min-height: 40px; padding: 6px 11px; font-size: 13px; gap: 6px; }
 .theme-toggle .icon { width: 17px; height: 17px; }
 .theme-toggle[aria-pressed="true"] { border-color: var(--blue); }
+.seat-my-page { max-width: 900px; margin: 0 auto; padding: 12px 0 26px; }
+.my-page-back { min-height: 40px; padding: 6px 12px; font-size: 13px; }
+.seat-my-page h1 { margin: 18px 0; font-size: clamp(24px, 4vw, 32px); }
+.my-page-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.my-page-card { padding: clamp(16px, 3vw, 26px); }
+.my-page-card h2 { margin: 12px 0; font-size: 19px; }
+.my-page-card .muted { font-size: 14px; line-height: 1.55; }
+.my-page-card .button { margin-top: 14px; }
+.my-page-account { margin: 0; }
+.my-page-account div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid var(--line); }
+.my-page-account dt { color: var(--muted); flex-shrink: 0; }
+.my-page-account dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.my-roster-count { margin: 2px 0 8px; font-weight: 700; }
+@media (max-width: 640px) { .my-page-grid { grid-template-columns: 1fr; } }
 .developer-credit { color: var(--muted); font-size: 12px; font-weight: 500; white-space: nowrap; }
 .guide-credit { margin-top: 12px; text-align: center; }
 .naver-button { padding: 6px 12px; }
@@ -1314,7 +1328,7 @@ h1:focus {
   @page { margin: 12mm; }
   :root, body { color-scheme: light; background: white; color: #18253b; }
   .app-header, .settings, .page-footer, .selection-panel, .export-actions,
-  .phase-badge, .seat-footer, .column-labels, .developer-credit { display: none !important; }
+  .phase-badge, .seat-footer, .column-labels, .developer-credit, .seat-my-page { display: none !important; }
   .app-shell, .workspace { display: block; max-width: none; padding: 0; }
   .classroom { display: block; padding: 0; border: 0; box-shadow: none; break-inside: avoid; }
   .classroom-heading { justify-content: center; }
@@ -1512,6 +1526,8 @@ function icon(name, className = '') {
     desk: '<path d="M3 8h18v6H3zm3 6v6m12-6v6M6 4h12"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .7-1.5 1.2-1.5 2m0 3v.1"/>',
     moon: '<path d="M20.9 13.3A9 9 0 0 1 10.7 3.1 9 9 0 1 0 20.9 13.3Z"/>',
+    user: '<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',
+    back: '<path d="M19 12H5m5-5-5 5 5 5"/>',
   };
   return `<svg class="icon ${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.grid}</svg>`;
 }
@@ -1546,11 +1562,11 @@ function mainScreen() {
       <div class="header-actions">
         ${themeButton()}
         <span id="seat-account-status" class="naver-status" role="status"></span>
-        <button class="button secondary naver-button" id="open-seat-roster" type="button" hidden>학생 이름</button>
+        <button class="button secondary naver-button" id="open-seat-my-page" type="button" hidden>${icon('user')}마이페이지</button>
         <button class="button secondary naver-button" id="seat-account" type="button" hidden>로그인</button>
         <button class="button help-button" id="help" type="button">${icon('help')}<span>사용 안내</span></button>
       </div></header>
-    <main class="workspace">
+    <main class="workspace" id="seat-workspace">
       <aside class="settings card" aria-label="자리 배정 설정">
         <section><h2><span class="step-number">1</span>번호 범위 설정</h2>
           <div class="number-range">
@@ -1589,6 +1605,27 @@ function mainScreen() {
         <footer class="seat-footer"><div class="legend"><span><i class="legend-box"></i>활성 좌석</span><span><i class="legend-box inactive"></i>비활성 좌석</span></div><p class="seat-counter"><span>활성 <strong id="active-count">36</strong>개</span><span class="counter-divider">|</span><span>비활성 <strong id="inactive-count">0</strong>개</span></p></footer>
         <div class="export-actions"><span id="roster-print-state" class="muted" role="status"></span><button id="print-seats" class="button secondary" type="button">인쇄 / PDF 저장</button><button id="save-seats" class="button secondary" type="button">좌석표 저장 (HTML)</button></div>
       </section>
+    </main>
+    <main class="seat-my-page" id="seat-my-page" aria-labelledby="seat-my-page-title" hidden>
+      <button class="button secondary my-page-back" id="back-to-seats" type="button">${icon('back')}좌석표로 돌아가기</button>
+      <h1 id="seat-my-page-title" tabindex="-1">마이페이지</h1>
+      <div class="my-page-grid">
+        <section class="card my-page-card" aria-labelledby="my-account-title">
+          <div class="brand-mark">${icon('user')}</div>
+          <h2 id="my-account-title">내 계정</h2>
+          <dl class="my-page-account">
+            <div><dt>로그인 방법</dt><dd id="my-account-provider"></dd></div>
+            <div id="my-account-name-row" hidden><dt>계정 이름</dt><dd id="my-account-name"></dd></div>
+          </dl>
+        </section>
+        <section class="card my-page-card" aria-labelledby="my-roster-title">
+          <div class="brand-mark">${icon('grid')}</div>
+          <h2 id="my-roster-title">학생 명단</h2>
+          <p id="my-roster-count" class="my-roster-count" role="status"></p>
+          <p class="muted">번호별로 저장한 이름은 좌석표를 인쇄하거나 PDF로 저장할 때 표시돼요.</p>
+          <button class="button secondary naver-button" id="open-seat-roster" type="button" hidden>학생 이름 관리</button>
+        </section>
+      </div>
     </main>
     <footer class="page-footer">${developerCredit}<span id="status-message" role="status" aria-live="polite">학생 수와 사용할 좌석을 확인해주세요.</span></footer>
   </div>
@@ -1633,6 +1670,11 @@ function renderRosterAccess() {
   if (!button) return;
   button.hidden = !rosterAccount;
   button.disabled = rosterState === 'loading';
+  document.querySelector('#my-roster-count').textContent = {
+    loading: '명단을 불러오는 중…',
+    error: '명단을 불러오지 못했어요.',
+    ready: `저장한 이름 ${Object.keys(rosterNames).length}명`,
+  }[rosterState] ?? '';
   document.querySelector('#roster-print-state').textContent = {
     loading: '학생 이름 불러오는 중…',
     error: '이름을 불러오지 못해 인쇄에는 번호만 표시돼요.',
@@ -1780,18 +1822,35 @@ function openSeatLogin(enter) {
 function renderSeatAccount() {
   const button = document.querySelector('#seat-account');
   const status = document.querySelector('#seat-account-status');
+  const myPageButton = document.querySelector('#open-seat-my-page');
+  const provider = seatUser?.providerData.some((item) => item.providerId === 'google.com') ? '구글' : '네이버';
   if (button) {
     button.textContent = seatUser ? '로그아웃' : '로그인';
     button.disabled = seatAuthBusy;
   }
   if (status) {
-    const provider = seatUser?.providerData.some((item) => item.providerId === 'google.com') ? '구글' : '네이버';
     status.textContent = seatUser ? `${provider} 로그인됨` : '';
+  }
+  if (myPageButton) {
+    const myPage = document.querySelector('#seat-my-page');
+    if (!seatUser && !myPage.hidden) showSeatMyPage(false, button);
+    myPageButton.hidden = !seatUser || !myPage.hidden;
+    document.querySelector('#my-account-provider').textContent = seatUser ? provider : '';
+    document.querySelector('#my-account-name').textContent = seatUser?.displayName ?? '';
+    document.querySelector('#my-account-name-row').hidden = !seatUser?.displayName;
   }
   const dialog = seatLoginDialog();
   if (!dialog) return;
   dialog.querySelector('#seat-login-status').textContent = seatLoginNotice;
   for (const item of dialog.querySelectorAll('[data-provider]')) item.disabled = !seatAuthReady || seatAuthBusy;
+}
+
+function showSeatMyPage(open, focusTarget) {
+  document.querySelector('#seat-workspace').hidden = open;
+  document.querySelector('#seat-my-page').hidden = !open;
+  document.querySelector('#status-message').hidden = open;
+  document.querySelector('#open-seat-my-page').hidden = open || !seatUser;
+  focusTarget?.focus();
 }
 
 function requestNaverToken() {
@@ -1829,6 +1888,11 @@ function bindSeatAccount() {
   const yes = dialog.querySelector('#seat-logout-yes');
   const no = dialog.querySelector('#seat-logout-no');
   const error = dialog.querySelector('#seat-logout-error');
+  const myPage = document.querySelector('#open-seat-my-page');
+  myPage.onclick = () => {
+    if (seatUser) showSeatMyPage(true, document.querySelector('#seat-my-page-title'));
+  };
+  document.querySelector('#back-to-seats').onclick = () => showSeatMyPage(false, myPage);
   button.hidden = false;
   button.onclick = () => {
     if (!seatUser) { seatLoginDialog().showModal(); return; }
