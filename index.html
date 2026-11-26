@@ -1212,6 +1212,18 @@ h1:focus {
 .seat.selectable { border-color: #6293eb; cursor: pointer; }
 .seat.selected { outline: 2px solid var(--blue); outline-offset: 2px; }
 
+.seat-print-name { display: none; }
+.roster-dialog { width: min(600px, calc(100% - 32px)); max-height: min(780px, calc(100dvh - 32px)); }
+.roster-dialog > p { margin: 8px 0 14px; color: #526582; font-size: 14px; }
+.roster-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; max-height: 48vh; overflow: auto; padding: 3px; }
+.roster-fields label { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.roster-fields label span { flex: 0 0 32px; }
+.roster-fields input { width: 100%; min-width: 0; min-height: 40px; padding: 6px 9px; border: 1px solid #bdcadc; border-radius: 8px; font: inherit; }
+.roster-actions { display: flex; gap: 8px; }
+.roster-dialog #seat-roster-status { min-height: 20px; margin-top: 10px; color: #526582; font-size: 13px; }
+#roster-print-state { align-self: center; }
+@media (max-width: 460px) { .roster-fields { grid-template-columns: 1fr; } }
+
 @media print {
   @page { margin: 12mm; }
   html, body { background: white; }
@@ -1225,6 +1237,8 @@ h1:focus {
   .seat.inactive { border-style: dashed; }
   .seat.selected { outline: none; }
   .seat-number { font-size: 18pt; }
+  .seat.assigned .seat-number::after { content: '번'; font-size: 10pt; }
+  .seat-print-name:not(:empty) { display: block; font-size: 10pt; line-height: 1.15; padding: 0 2mm; overflow-wrap: anywhere; }
 }
 
 
@@ -1437,6 +1451,7 @@ function mainScreen() {
     <header class="app-header"><div class="brand"><div class="brand-mark">${icon('grid')}</div><div><h1 id="main-title" tabindex="-1">자리바꾸기</h1><p>즐거운 교실, 새로운 자리로</p></div></div>
       <div class="header-actions">
         <span id="seat-account-status" class="naver-status" role="status"></span>
+        <button class="button secondary naver-button" id="open-seat-roster" type="button" hidden>학생 이름</button>
         <button class="button secondary naver-button" id="seat-account" type="button" hidden>로그인</button>
         <button class="button help-button" id="help" type="button">${icon('help')}<span>사용 안내</span></button>
       </div></header>
@@ -1477,15 +1492,161 @@ function mainScreen() {
           <div id="seat-grid" class="seat-grid" aria-label="6행 6열 교실 좌석"></div><div class="back-label">교실 뒤쪽</div>
         </div>
         <footer class="seat-footer"><div class="legend"><span><i class="legend-box"></i>활성 좌석</span><span><i class="legend-box inactive"></i>비활성 좌석</span></div><p class="seat-counter"><span>활성 <strong id="active-count">36</strong>개</span><span class="counter-divider">|</span><span>비활성 <strong id="inactive-count">0</strong>개</span></p></footer>
-        <div class="export-actions"><button id="print-seats" class="button secondary" type="button">인쇄 / PDF 저장</button><button id="save-seats" class="button secondary" type="button">좌석표 저장 (HTML)</button></div>
+        <div class="export-actions"><span id="roster-print-state" class="muted" role="status"></span><button id="print-seats" class="button secondary" type="button">인쇄 / PDF 저장</button><button id="save-seats" class="button secondary" type="button">좌석표 저장 (HTML)</button></div>
       </section>
     </main>
     <footer class="page-footer"><span>우리 교실, 함께 만드는 새로운 하루</span><span id="status-message" role="status" aria-live="polite">학생 수와 사용할 좌석을 확인해주세요.</span></footer>
   </div>
+  <dialog id="seat-roster" class="help-dialog roster-dialog" aria-labelledby="seat-roster-title">
+    <h2 id="seat-roster-title">번호별 학생 이름</h2>
+    <p>저장한 이름은 좌석표를 인쇄할 때 자동으로 표시돼요. 지우려면 해당 칸을 비운 뒤 저장하세요.</p>
+    <form id="seat-roster-form" autocomplete="off">
+      <div id="seat-roster-fields" class="roster-fields"></div>
+      <p id="seat-roster-status" role="status"></p>
+      <div class="roster-actions"><button id="seat-roster-close" class="button secondary" type="button">닫기</button><button id="seat-roster-save" class="button primary" type="submit">이름 저장</button></div>
+    </form>
+  </dialog>
   <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title"><h2 id="help-title">자리바꾸기 사용 안내</h2><ol class="notice-list">${notices.map((notice) => `<li>${notice}</li>`).join('')}</ol><p class="hint">배정 초기화를 누르면 학생 자리만 지워지고 번호 범위와 좌석 사용 설정은 유지됩니다.</p><button id="close-help" type="button" class="button primary">확인</button></dialog>
   <dialog id="reset-dialog" class="help-dialog" aria-labelledby="reset-title"><h2 id="reset-title">자리 배정을 초기화할까요?</h2><p>배정된 자리와 추첨 중인 번호가 지워집니다. 번호 범위와 좌석 사용 설정은 유지됩니다.</p><form method="dialog" class="dialog-actions"><button class="button secondary" value="cancel" autofocus>취소</button><button class="button primary" value="reset">초기화</button></form></dialog>
   <div id="countdown-overlay" class="countdown-overlay" role="dialog" aria-modal="true" aria-labelledby="countdown-title" tabindex="-1" hidden><div class="countdown-card"><p id="countdown-title">새로운 자리를 준비하고 있어요</p><div id="countdown-number" class="countdown-number" role="status" aria-live="assertive" aria-atomic="true">3</div><span>잠시 후 우리 반 자리가 공개됩니다.</span></div></div>`;
 }
+
+
+let rosterAccount = null;
+let rosterNames = {};
+let rosterState = 'guest';
+let rosterClient;
+let rosterRefresh = () => {};
+let rosterSession = 0;
+
+function getSeatPrintName(number) {
+  return rosterNames[number] ?? '';
+}
+
+function seatRosterLoading() {
+  return rosterState === 'loading';
+}
+
+function renderRosterAccess() {
+  const button = document.querySelector('#open-seat-roster');
+  if (!button) return;
+  button.hidden = !rosterAccount;
+  button.disabled = rosterState === 'loading';
+  document.querySelector('#roster-print-state').textContent = {
+    loading: '학생 이름 불러오는 중…',
+    error: '이름을 불러오지 못해 인쇄에는 번호만 표시돼요.',
+  }[rosterState] ?? '';
+  rosterRefresh();
+}
+
+function readRoster(snapshot) {
+  const names = snapshot.data()?.names ?? {};
+  return Object.fromEntries(Object.entries(names).filter(([number, name]) =>
+    /^(?:[1-9]|[12][0-9]|30)$/.test(number) && typeof name === 'string' && name.length <= 24));
+}
+
+async function syncSeatRoster(app, uid) {
+  const session = ++rosterSession;
+  const dialog = document.querySelector('#seat-roster');
+  if (dialog?.open) dialog.close();
+  document.querySelector('#seat-roster-fields')?.replaceChildren();
+  rosterAccount = uid ? { app, uid } : null;
+  rosterNames = {};
+  rosterClient = null;
+  rosterState = uid ? 'loading' : 'guest';
+  renderRosterAccess();
+  if (!uid) return;
+
+  try {
+    const sdk = await import('https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js');
+    const database = sdk.getFirestore(app);
+    const ref = sdk.doc(database, 'seatRosters', uid);
+    const names = readRoster(await sdk.getDocFromServer(ref));
+    if (session !== rosterSession) return;
+    rosterClient = { sdk, database, ref };
+    rosterNames = names;
+    rosterState = 'ready';
+  } catch {
+    if (session !== rosterSession) return;
+    rosterState = 'error';
+  }
+  renderRosterAccess();
+}
+
+function bindSeatRoster(refresh) {
+  rosterRefresh = refresh;
+  const dialog = document.querySelector('#seat-roster');
+  const fields = dialog.querySelector('#seat-roster-fields');
+  const status = dialog.querySelector('#seat-roster-status');
+  const save = dialog.querySelector('#seat-roster-save');
+  const close = dialog.querySelector('#seat-roster-close');
+  dialog.addEventListener('cancel', (event) => { if (close.disabled) event.preventDefault(); });
+  close.onclick = () => dialog.close();
+  dialog.addEventListener('close', () => { if (!dialog.open) fields.replaceChildren(); });
+
+  document.querySelector('#open-seat-roster').onclick = async () => {
+    if (!rosterAccount) return;
+    if (!rosterClient) await syncSeatRoster(rosterAccount.app, rosterAccount.uid);
+    if (!rosterAccount) return;
+    fields.replaceChildren();
+    close.disabled = false;
+    save.disabled = !rosterClient;
+    status.textContent = rosterClient ? '' : '이름을 불러오지 못했어요. 닫은 뒤 다시 열어주세요.';
+    if (rosterClient) {
+      for (let number = 1; number <= 30; number++) {
+        const label = document.createElement('label');
+        const caption = document.createElement('span');
+        const field = document.createElement('input');
+        caption.textContent = `${number}번`;
+        field.name = String(number);
+        field.maxLength = 24;
+        field.value = rosterNames[number] ?? '';
+        label.append(caption, field);
+        fields.append(label);
+      }
+    }
+    if (!dialog.open) dialog.showModal();
+  };
+
+  dialog.querySelector('form').onsubmit = async (event) => {
+    event.preventDefault();
+    if (!rosterClient || save.disabled) return;
+    const changes = Array.from(new FormData(event.currentTarget), ([number, value]) => [number, value.trim()])
+      .filter(([number, value]) => value !== (rosterNames[number] ?? ''));
+    if (!changes.length) { dialog.close(); return; }
+
+    const session = rosterSession;
+    const { sdk, database, ref } = rosterClient;
+    const inputs = fields.querySelectorAll('input');
+    for (const input of inputs) input.disabled = true;
+    save.disabled = close.disabled = true;
+    status.textContent = '이름을 저장하는 중…';
+    try {
+      const names = await sdk.runTransaction(database, async (transaction) => {
+        const next = readRoster(await transaction.get(ref));
+        for (const [number, value] of changes) {
+          if (value) next[number] = value;
+          else delete next[number];
+        }
+        transaction.set(ref, { names: next });
+        return next;
+      });
+      if (session !== rosterSession) return;
+      rosterNames = names;
+      renderRosterAccess();
+      dialog.close();
+    } catch {
+      if (session === rosterSession) status.textContent = '저장하지 못했어요. 연결을 확인한 뒤 다시 시도해주세요.';
+    } finally {
+      if (session === rosterSession) {
+        for (const input of inputs) input.disabled = false;
+        save.disabled = close.disabled = false;
+      }
+    }
+  };
+  renderRosterAccess();
+}
+
 
 
 const seatNaverConfig = {
@@ -1596,13 +1757,18 @@ async function setupSeatLogin(enter) {
     const sdk = 'https://www.gstatic.com/firebasejs/13.4.0';
     const [app, authSdk] = await Promise.all([import(`${sdk}/firebase-app.js`), import(`${sdk}/firebase-auth.js`)]);
     seatAuthSdk = authSdk;
-    seatAuth = authSdk.getAuth(app.initializeApp(seatNaverConfig.firebase));
+    const firebaseApp = app.initializeApp(seatNaverConfig.firebase);
+    seatAuth = authSdk.getAuth(firebaseApp);
     await authSdk.setPersistence(seatAuth, authSdk.browserSessionPersistence);
     await seatAuth.authStateReady();
     seatUser = seatAuth.currentUser;
     seatAuthReady = true;
     if (seatUser && dialog.open) { dialog.close(); enter(); }
-    authSdk.onAuthStateChanged(seatAuth, (user) => { seatUser = user; renderSeatAccount(); });
+    authSdk.onAuthStateChanged(seatAuth, (user) => {
+      seatUser = user;
+      renderSeatAccount();
+      void syncSeatRoster(firebaseApp, user?.uid ?? null);
+    });
     for (const button of dialog.querySelectorAll('[data-provider]')) {
       button.onclick = async () => {
         if (seatAuthBusy) return;
@@ -1642,6 +1808,7 @@ async function setupSeatLogin(enter) {
 
 
 
+
 const app = document.querySelector('#app');
 const $ = (selector) => document.querySelector(selector);
 let state = createInitialState();
@@ -1667,7 +1834,8 @@ function renderState() {
   $('#draw').disabled = counting || choosing || remaining === 0;
   $('#shuffle').disabled = counting || choosing || assigned > 0;
   $('#reset').disabled = counting || (!choosing && assigned === 0);
-  $('#print-seats').disabled = $('#save-seats').disabled = counting || assigned === 0;
+  $('#save-seats').disabled = counting || assigned === 0;
+  $('#print-seats').disabled = $('#save-seats').disabled || seatRosterLoading();
   $('#student-total').textContent = total;
   $('#summary-count').textContent = `${remaining}명`;
   $('#available-count').textContent = `${free}석`;
@@ -1718,6 +1886,7 @@ function renderState() {
     button.setAttribute('aria-label', `${seat.row + 1}행 ${seat.col + 1}열, ${description}`);
     button.firstElementChild.textContent = !seat.active ? '비활성' : seat.student ?? '빈자리';
     button.firstElementChild.className = seat.student === null ? 'seat-caption' : 'seat-number';
+    button.lastElementChild.textContent = getSeatPrintName(seat.student);
   });
 
   $('#countdown-overlay').hidden = !counting;
@@ -1775,7 +1944,9 @@ function start() {
     button.type = 'button';
     button.className = 'seat';
     button.dataset.seatId = seat.id;
-    button.append(document.createElement('span'));
+    const printName = document.createElement('span');
+    printName.className = 'seat-print-name';
+    button.append(document.createElement('span'), printName);
     button.addEventListener('click', () => {
       const choosing = state.pending !== null || state.manual !== null;
       dispatch({ type: choosing ? 'CHOOSE_SEAT' : 'TOGGLE_SEAT', id: seat.id });
@@ -1833,6 +2004,7 @@ function start() {
   $('#save-seats').addEventListener('click', saveSeats);
   $('#help').addEventListener('click', () => $('#help-dialog').showModal());
   $('#close-help').addEventListener('click', () => $('#help-dialog').close());
+  bindSeatRoster(renderState);
   renderState();
   $('#main-title').focus({ preventScroll: true });
 }
