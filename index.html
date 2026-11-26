@@ -181,20 +181,6 @@ h1:focus {
 .theme-toggle { min-height: 40px; padding: 6px 11px; font-size: 13px; gap: 6px; }
 .theme-toggle .icon { width: 17px; height: 17px; }
 .theme-toggle[aria-pressed="true"] { border-color: var(--blue); }
-.seat-my-page { max-width: 900px; margin: 0 auto; padding: 12px 0 26px; }
-.my-page-back { min-height: 40px; padding: 6px 12px; font-size: 13px; }
-.seat-my-page h1 { margin: 18px 0; font-size: clamp(24px, 4vw, 32px); }
-.my-page-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.my-page-card { padding: clamp(16px, 3vw, 26px); }
-.my-page-card h2 { margin: 12px 0; font-size: 19px; }
-.my-page-card .muted { font-size: 14px; line-height: 1.55; }
-.my-page-card .button { margin-top: 14px; }
-.my-page-account { margin: 0; }
-.my-page-account div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid var(--line); }
-.my-page-account dt { color: var(--muted); flex-shrink: 0; }
-.my-page-account dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
-.my-roster-count { margin: 2px 0 8px; font-weight: 700; }
-@media (max-width: 640px) { .my-page-grid { grid-template-columns: 1fr; } }
 .developer-credit { color: var(--muted); font-size: 12px; font-weight: 500; white-space: nowrap; }
 .guide-credit { margin-top: 12px; text-align: center; }
 .naver-button { padding: 6px 12px; }
@@ -1247,16 +1233,104 @@ h1:focus {
 .seat.selected { outline: 2px solid var(--blue); outline-offset: 2px; }
 
 .seat-print-name { display: none; }
-.roster-dialog { width: min(600px, calc(100% - 32px)); max-height: min(780px, calc(100dvh - 32px)); }
-.roster-dialog > p { margin: 8px 0 14px; color: #526582; font-size: 14px; }
-.roster-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; max-height: 48vh; overflow: auto; padding: 3px; }
-.roster-fields label { display: flex; gap: 8px; align-items: center; font-size: 14px; }
-.roster-fields label span { flex: 0 0 32px; }
-.roster-fields input { width: 100%; min-width: 0; min-height: 40px; padding: 6px 9px; border: 1px solid #bdcadc; border-radius: 8px; font: inherit; }
-.roster-actions { display: flex; gap: 8px; }
-.roster-dialog #seat-roster-status { min-height: 20px; margin-top: 10px; color: #526582; font-size: 13px; }
 #roster-print-state { align-self: center; }
-@media (max-width: 460px) { .roster-fields { grid-template-columns: 1fr; } }
+
+.seat-my-page {
+  --roster-soft: #f3f6fb;
+  --roster-border: #d8e1ef;
+  --roster-field: #fff;
+  --roster-accent-soft: #ecf2ff;
+  --roster-accent-ink: #1e50b0;
+  --roster-saved-bg: #e7f6ed;
+  --roster-saved-ink: #216443;
+  --roster-changed-bg: #fff0cc;
+  --roster-changed-ink: #724a00;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 8px 0 30px;
+}
+.my-page-toolbar { margin-bottom: 14px; }
+.app-shell:has(.seat-my-page:not([hidden])) #seat-account-status { display: none; }
+.my-page-back { min-height: 40px; padding: 6px 13px; font-size: 14px; }
+.my-page-back .icon { width: 18px; height: 18px; }
+.my-page-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: clamp(22px, 4vw, 38px);
+  background: #142e59;
+  background: linear-gradient(115deg, #142e59 25%, #2653a1 100%);
+  color: #fff;
+  border-radius: 20px;
+  margin-bottom: 18px;
+}
+.my-page-hero h1 { font-size: clamp(29px, 4vw, 41px); letter-spacing: -.045em; }
+.my-page-hero p { margin-top: 8px; line-height: 1.55; color: #dde9ff; font-size: 14px; }
+.my-page-seat-motif { display: grid; grid-template-columns: repeat(4, 23px); gap: 5px; transform: rotate(-9deg); margin-right: 10px; }
+.my-page-seat-motif i { display: block; aspect-ratio: 1; border: 1px solid #91b7f9; border-radius: 5px; background: #6d9fff28; }
+.my-page-seat-motif i:nth-child(4n + 2) { background: #96c0ff5c; }
+.my-page-layout { display: grid; grid-template-columns: minmax(210px, .65fr) minmax(0, 1.85fr); gap: 18px; align-items: start; }
+.my-page-sidebar { display: grid; gap: 14px; min-width: 0; }
+.my-page-sidebar .card { padding: 20px; }
+.my-page-sidebar h2 { margin-bottom: 15px; font-size: 15px; }
+.my-page-identity { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.my-page-identity > div { min-width: 0; }
+.my-page-identity strong { display: block; font-size: 17px; overflow-wrap: anywhere; }
+#my-account-provider { display: block; margin-top: 2px; color: var(--muted); font-size: 13px; }
+.my-page-avatar { display: grid; place-items: center; flex: 0 0 43px; height: 43px; border-radius: 13px; background: var(--roster-accent-soft); color: var(--roster-accent-ink); }
+.my-page-account p { display: flex; align-items: center; gap: 6px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.my-page-account p .icon, .my-roster-search .icon { width: 16px; height: 16px; }
+.roster-total strong { font-size: 32px; line-height: 1; color: var(--roster-accent-ink); font-variant-numeric: tabular-nums; }
+.roster-total span { color: var(--muted); font-size: 14px; }
+.my-page-summary progress { appearance: none; width: 100%; height: 8px; margin: 12px 0 6px; border: 0; border-radius: 12px; background: var(--roster-soft); overflow: hidden; }
+.my-page-summary progress::-webkit-progress-bar { background: var(--roster-soft); }
+.my-page-summary progress::-webkit-progress-value { background: #4c81e7; border-radius: 12px; }
+.my-page-summary progress::-moz-progress-bar { background: #4c81e7; border-radius: 12px; }
+.my-page-summary .muted { font-size: 13px; }
+.my-page-roster { min-width: 0; overflow: hidden; }
+.my-roster-heading { padding: 20px 22px 15px; }
+.my-roster-heading h2 { margin-bottom: 5px; font-size: 22px; letter-spacing: -.03em; }
+.my-roster-heading p { font-size: 13px; line-height: 1.6; }
+.my-roster-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 0 22px 14px; }
+.my-roster-search { display: flex; align-items: center; gap: 8px; flex: 1 1 180px; min-width: 0; padding: 0 11px; border: 1px solid var(--roster-border); border-radius: 9px; background: var(--roster-field); color: var(--muted); }
+.my-roster-search input { width: 100%; min-width: 0; min-height: 40px; padding: 6px 0; border: 0; background: none; color: inherit; font-size: 14px; }
+.my-roster-search input:focus-visible { outline-offset: 2px; }
+.my-roster-filters { display: flex; gap: 3px; align-items: center; padding: 4px; border-radius: 9px; background: var(--roster-soft); }
+.my-roster-filters button { min-height: 33px; border: 1px solid transparent; border-radius: 6px; padding: 4px 9px; background: transparent; color: var(--muted); font-size: 13px; }
+.my-roster-filters button[aria-pressed="true"] { color: var(--roster-accent-ink); background: var(--roster-field); border-color: var(--roster-border); font-weight: 700; }
+.my-roster-columns, .roster-row { display: grid; grid-template-columns: 45px minmax(0, 1fr) 66px; gap: 12px; align-items: center; padding: 8px 22px; }
+.my-roster-columns { background: var(--roster-soft); color: var(--muted); font-size: 12px; font-weight: 700; border-block: 1px solid var(--line); }
+.my-roster-columns span:last-child { text-align: center; }
+.roster-fields { max-height: min(50vh, 405px); overflow: auto; }
+.roster-row { border-bottom: 1px solid var(--line); }
+.roster-row:hover, .roster-row:focus-within { background: var(--roster-soft); }
+.roster-row:last-child { border-bottom: 0; }
+.roster-row-number { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.roster-row input { width: 100%; min-width: 0; min-height: 40px; padding: 6px 9px; border: 1px solid var(--roster-border); border-radius: 8px; background: var(--roster-field); color: inherit; font-size: 14px; }
+.roster-row-state { justify-self: center; padding: 4px 6px; border-radius: 6px; background: var(--roster-soft); color: var(--muted); font-size: 11px; font-weight: 700; white-space: nowrap; }
+.roster-row-state[data-state="saved"] { color: var(--roster-saved-ink); background: var(--roster-saved-bg); }
+.roster-row-state[data-state="changed"] { color: var(--roster-changed-ink); background: var(--roster-changed-bg); }
+.my-roster-empty, .my-roster-unavailable { padding: 22px; color: var(--muted); font-size: 14px; }
+.my-roster-unavailable .button { margin-top: 12px; padding: 6px 13px; }
+.roster-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; padding: 12px 22px; border-top: 1px solid var(--line); background: var(--roster-soft); }
+#seat-roster-status { flex: 1 1 150px; color: var(--muted); font-size: 13px; }
+.roster-save-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-left: auto; }
+.roster-save-buttons .button { min-height: 41px; padding: 6px 12px; font-size: 14px; }
+.roster-save-buttons .icon { width: 17px; height: 17px; }
+
+@media (max-width: 700px) {
+  .my-page-layout { grid-template-columns: minmax(0, 1fr); }
+  .my-page-sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .my-page-sidebar .card { padding: 13px; }
+  .my-page-account p { display: none; }
+  .my-page-identity strong { font-size: 15px; }
+  .my-page-avatar { flex-basis: 32px; height: 32px; }
+  .my-page-avatar .icon { width: 17px; height: 17px; }
+  .my-page-seat-motif { grid-template-columns: repeat(4, 12px); gap: 3px; margin-right: 2px; }
+  .my-roster-heading, .my-roster-tools, .roster-actions { padding-inline: 14px; }
+  .my-roster-columns, .roster-row { grid-template-columns: 32px minmax(0, 1fr) 49px; gap: 8px; padding-inline: 14px; }
+}
 
 @media screen {
   :root[data-theme="dark"] {
@@ -1268,6 +1342,17 @@ h1:focus {
     --muted: #b1c0d7;
     --line: #344761;
     --blue: #8cb6ff;
+  }
+  [data-theme="dark"] .seat-my-page {
+    --roster-soft: #202e43;
+    --roster-border: #435977;
+    --roster-field: #111b2c;
+    --roster-accent-soft: #263e64;
+    --roster-accent-ink: #adcaff;
+    --roster-saved-bg: #1b473b;
+    --roster-saved-ink: #b1efd0;
+    --roster-changed-bg: #4d3e26;
+    --roster-changed-ink: #ffdb91;
   }
 
   [data-theme="dark"] :is(.card, .welcome-card, .help-dialog, .seat-login, .countdown-card) {
@@ -1284,7 +1369,7 @@ h1:focus {
   [data-theme="dark"] :is(.help-button,.reset-button):hover:not(:disabled) { background: #304666; border-color: #7697c6; }
   [data-theme="dark"] .theme-toggle[aria-pressed="true"] { background: #264570; border-color: var(--blue); }
 
-  [data-theme="dark"] :is(.help-button, .reset-button, .seat-login p, .logout-dialog p, .roster-dialog > p, .roster-dialog #seat-roster-status,
+  [data-theme="dark"] :is(.help-button, .reset-button, .seat-login p, .logout-dialog p,
     .notice-list li, .welcome-footer, .eyebrow, .room-dimensions, .range-separator, .optional, .legend, .seat-counter, .page-footer,
     .front-label, .back-label, .column-labels, .settings-footnote, .countdown-card > span, .readiness strong, #inactive-count) { color: var(--muted); }
 
@@ -1298,7 +1383,7 @@ h1:focus {
   [data-theme="dark"] .notice-list li::before { background: var(--dark-raised); color: var(--muted); border-color: var(--line); }
   [data-theme="dark"] .front-label span { background: var(--line); }
 
-  [data-theme="dark"] :is(.number-range input, .manual-controls select, .roster-fields input) {
+  [data-theme="dark"] :is(.number-range input, .manual-controls select) {
     background: #111b2c;
     color: #e8effb;
     border-color: #637999;
@@ -1322,6 +1407,9 @@ h1:focus {
   .app-header { flex-wrap: wrap; gap: 9px; }
   .header-actions { width: 100%; }
   .page-footer { flex-wrap: wrap; }
+  .app-shell:has(.seat-my-page:not([hidden])) .header-actions { justify-content: flex-start; gap: 6px; }
+  .app-shell:has(.seat-my-page:not([hidden])) .header-actions .button { min-height: 38px; padding: 5px 9px; font-size: 12px; gap: 4px; }
+  .app-shell:has(.seat-my-page:not([hidden])) .header-actions .icon { width: 15px; height: 15px; }
 }
 
 @media print {
@@ -1528,6 +1616,8 @@ function icon(name, className = '') {
     moon: '<path d="M20.9 13.3A9 9 0 0 1 10.7 3.1 9 9 0 1 0 20.9 13.3Z"/>',
     user: '<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',
     back: '<path d="M19 12H5m5-5-5 5 5 5"/>',
+    search: '<circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   };
   return `<svg class="icon ${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.grid}</svg>`;
 }
@@ -1607,23 +1697,54 @@ function mainScreen() {
       </section>
     </main>
     <main class="seat-my-page" id="seat-my-page" aria-labelledby="seat-my-page-title" hidden>
-      <button class="button secondary my-page-back" id="back-to-seats" type="button">${icon('back')}좌석표로 돌아가기</button>
-      <h1 id="seat-my-page-title" tabindex="-1">마이페이지</h1>
-      <div class="my-page-grid">
-        <section class="card my-page-card" aria-labelledby="my-account-title">
-          <div class="brand-mark">${icon('user')}</div>
-          <h2 id="my-account-title">내 계정</h2>
-          <dl class="my-page-account">
-            <div><dt>로그인 방법</dt><dd id="my-account-provider"></dd></div>
-            <div id="my-account-name-row" hidden><dt>계정 이름</dt><dd id="my-account-name"></dd></div>
-          </dl>
-        </section>
-        <section class="card my-page-card" aria-labelledby="my-roster-title">
-          <div class="brand-mark">${icon('grid')}</div>
-          <h2 id="my-roster-title">학생 명단</h2>
-          <p id="my-roster-count" class="my-roster-count" role="status"></p>
-          <p class="muted">번호별로 저장한 이름은 좌석표를 인쇄하거나 PDF로 저장할 때 표시돼요.</p>
-          <button class="button secondary naver-button" id="open-seat-roster" type="button" hidden>학생 이름 관리</button>
+      <div class="my-page-toolbar"><button class="button secondary my-page-back" id="back-to-seats" type="button">${icon('back')}좌석표로 돌아가기</button></div>
+      <header class="my-page-hero">
+        <div><h1 id="seat-my-page-title" tabindex="-1">마이페이지</h1><p>학생 이름을 관리하고 인쇄할 좌석표를 준비하세요.</p></div>
+        <div class="my-page-seat-motif" aria-hidden="true">${'<i></i>'.repeat(12)}</div>
+      </header>
+      <div class="my-page-layout">
+        <aside class="my-page-sidebar">
+          <section class="card my-page-account" aria-labelledby="my-account-title">
+            <h2 id="my-account-title">내 계정</h2>
+            <div class="my-page-identity">
+              <span class="my-page-avatar" aria-hidden="true">${icon('user')}</span>
+              <div><strong id="my-account-name"></strong><span id="my-account-provider"></span></div>
+            </div>
+            <p>${icon('lock')}명단은 이 계정에 저장돼요.</p>
+          </section>
+          <section class="card my-page-summary" aria-labelledby="my-summary-title">
+            <h2 id="my-summary-title">명단 등록 현황</h2>
+            <p class="roster-total"><strong id="my-roster-saved">–</strong><span> / 30명</span></p>
+            <progress id="my-roster-progress" max="30" value="0" aria-label="저장한 학생 이름 수"></progress>
+            <p class="muted" id="my-roster-count" role="status"></p>
+          </section>
+        </aside>
+        <section class="card my-page-roster" aria-labelledby="my-roster-title">
+          <div class="my-roster-heading">
+            <h2 id="my-roster-title">학생 명단</h2>
+            <p class="muted">저장한 이름은 인쇄와 PDF에 자동으로 표시돼요. 이름을 지우려면 칸을 비우고 저장하세요.</p>
+          </div>
+          <div class="my-roster-unavailable" id="seat-roster-unavailable" role="status" hidden>
+            <p id="seat-roster-message"></p>
+            <button class="button secondary" id="seat-roster-retry" type="button" hidden>다시 불러오기</button>
+          </div>
+          <form id="seat-roster-form" autocomplete="off" hidden>
+            <div class="my-roster-tools">
+              <label class="my-roster-search">${icon('search')}<input id="seat-roster-search" type="search" aria-label="번호 또는 이름 검색" placeholder="번호 또는 이름 검색"></label>
+              <div class="my-roster-filters" role="group" aria-label="명단 필터">
+                <button type="button" data-roster-filter="all" aria-pressed="true">전체</button>
+                <button type="button" data-roster-filter="saved" aria-pressed="false">등록</button>
+                <button type="button" data-roster-filter="empty" aria-pressed="false">미입력</button>
+              </div>
+            </div>
+            <div class="my-roster-columns" aria-hidden="true"><span>번호</span><span>학생 이름</span><span>상태</span></div>
+            <div id="seat-roster-fields" class="roster-fields" role="group" aria-label="번호별 학생 이름"></div>
+            <p id="seat-roster-empty" class="my-roster-empty" role="status" hidden>검색 조건에 맞는 학생이 없어요.</p>
+            <div class="roster-actions">
+              <p id="seat-roster-status" role="status"></p>
+              <div class="roster-save-buttons"><button id="seat-roster-discard" class="button secondary" type="button" disabled>변경 취소</button><button id="seat-roster-save" class="button primary" type="submit" disabled>${icon('check')}이름 저장</button></div>
+            </div>
+          </form>
         </section>
       </div>
     </main>
@@ -1632,17 +1753,9 @@ function mainScreen() {
   <dialog id="seat-logout" class="help-dialog logout-dialog" aria-labelledby="seat-logout-title">
     <h2 id="seat-logout-title">로그아웃 하시겠습니까?</h2>
     <p>처음 화면으로 돌아가고 현재 자리 배정은 초기화돼요.</p>
+    <p id="seat-logout-draft" hidden>저장하지 않은 명단 변경도 사라져요.</p>
     <p id="seat-logout-error" role="alert" hidden></p>
     <div class="logout-actions"><button id="seat-logout-no" class="button secondary" type="button" autofocus>아니오</button><button id="seat-logout-yes" class="button primary" type="button">예</button></div>
-  </dialog>
-  <dialog id="seat-roster" class="help-dialog roster-dialog" aria-labelledby="seat-roster-title">
-    <h2 id="seat-roster-title">번호별 학생 이름</h2>
-    <p>저장한 이름은 좌석표를 인쇄할 때 자동으로 표시돼요. 지우려면 해당 칸을 비운 뒤 저장하세요.</p>
-    <form id="seat-roster-form" autocomplete="off">
-      <div id="seat-roster-fields" class="roster-fields"></div>
-      <p id="seat-roster-status" role="status"></p>
-      <div class="roster-actions"><button id="seat-roster-close" class="button secondary" type="button">닫기</button><button id="seat-roster-save" class="button primary" type="submit">이름 저장</button></div>
-    </form>
   </dialog>
   <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title"><h2 id="help-title">자리바꾸기 사용 안내</h2><ol class="notice-list">${notices.map((notice) => `<li>${notice}</li>`).join('')}</ol><p class="hint">배정 초기화를 누르면 학생 자리만 지워지고 번호 범위와 좌석 사용 설정은 유지됩니다.</p><button id="close-help" type="button" class="button primary">확인</button><p class="guide-credit">${developerCredit}</p></dialog>
   <dialog id="reset-dialog" class="help-dialog" aria-labelledby="reset-title"><h2 id="reset-title">자리 배정을 초기화할까요?</h2><p>배정된 자리와 추첨 중인 번호가 지워집니다. 번호 범위와 좌석 사용 설정은 유지됩니다.</p><form method="dialog" class="dialog-actions"><button class="button secondary" value="cancel" autofocus>취소</button><button class="button primary" value="reset">초기화</button></form></dialog>
@@ -1656,6 +1769,10 @@ let rosterState = 'guest';
 let rosterClient;
 let rosterRefresh = () => {};
 let rosterSession = 0;
+let rosterDraft = {};
+let rosterSaving = false;
+let rosterFilter = 'all';
+let rosterFeedback = '';
 
 function getSeatPrintName(number) {
   return rosterNames[number] ?? '';
@@ -1665,16 +1782,85 @@ function seatRosterLoading() {
   return rosterState === 'loading';
 }
 
+function rosterChanges() {
+  return Object.entries(rosterDraft).filter(([number, name]) => name !== (rosterNames[number] ?? ''));
+}
+
+function hasUnsavedSeatRoster() {
+  return rosterChanges().length > 0;
+}
+
+function resetRosterInputs({ resetSearch = false } = {}) {
+  rosterDraft = {};
+  const form = document.querySelector('#seat-roster-form');
+  if (!form) return;
+  for (const field of form.querySelectorAll('input[data-roster-name]')) field.value = rosterNames[field.name] ?? '';
+  if (resetSearch) {
+    form.querySelector('#seat-roster-search').value = '';
+    rosterFilter = 'all';
+  }
+}
+
+function filterRosterRows() {
+  const search = document.querySelector('#seat-roster-search');
+  if (!search) return;
+  const query = search.value.trim().toLocaleLowerCase();
+  let visible = 0;
+  for (const row of document.querySelectorAll('[data-roster-row]')) {
+    const number = row.dataset.rosterRow;
+    const name = rosterDraft[number] ?? rosterNames[number] ?? '';
+    const saved = Boolean(rosterNames[number]);
+    const matchesSearch = `${number}번`.includes(query) || name.toLocaleLowerCase().includes(query);
+    row.hidden = !matchesSearch || (rosterFilter === 'saved' && !saved) || (rosterFilter === 'empty' && saved);
+    if (!row.hidden) visible++;
+  }
+  for (const button of document.querySelectorAll('[data-roster-filter]')) {
+    button.setAttribute('aria-pressed', String(button.dataset.rosterFilter === rosterFilter));
+  }
+  document.querySelector('#seat-roster-empty').hidden = visible > 0;
+}
+
+function renderRosterEdits() {
+  const form = document.querySelector('#seat-roster-form');
+  if (!form) return;
+  const changes = rosterChanges().length;
+  form.querySelector('#seat-roster-status').textContent = rosterSaving ? '이름을 저장하는 중…'
+    : rosterFeedback || (changes ? `저장하지 않은 변경 ${changes}건` : '변경 사항 없음');
+  for (const id of ['seat-roster-save', 'seat-roster-discard']) {
+    form.querySelector(`#${id}`).disabled = !changes || rosterSaving || rosterState !== 'ready';
+  }
+  for (const row of form.querySelectorAll('[data-roster-row]')) {
+    const number = row.dataset.rosterRow;
+    const saved = rosterNames[number];
+    const changed = Object.hasOwn(rosterDraft, number) && rosterDraft[number] !== (saved ?? '');
+    const label = row.querySelector('.roster-row-state');
+    label.dataset.state = changed ? 'changed' : saved ? 'saved' : 'empty';
+    label.textContent = changed ? '변경됨' : saved ? '등록됨' : '미입력';
+    row.querySelector('input').disabled = rosterSaving;
+  }
+}
+
 function renderRosterAccess() {
-  const button = document.querySelector('#open-seat-roster');
-  if (!button) return;
-  button.hidden = !rosterAccount;
-  button.disabled = rosterState === 'loading';
+  const form = document.querySelector('#seat-roster-form');
+  if (!form) return;
+  const ready = rosterState === 'ready';
+  const count = Object.keys(rosterNames).length;
+  form.hidden = !ready;
+  document.querySelector('#seat-roster-unavailable').hidden = ready;
+  document.querySelector('#seat-roster-retry').hidden = rosterState !== 'error';
+  document.querySelector('#seat-roster-message').textContent = {
+    loading: '학생 명단을 불러오는 중…',
+    error: '학생 명단에 연결하지 못했어요. 다시 불러오기를 눌러주세요.',
+  }[rosterState] ?? '';
+  document.querySelector('#my-roster-saved').textContent = ready ? count : '–';
+  document.querySelector('#my-roster-progress').value = count;
   document.querySelector('#my-roster-count').textContent = {
     loading: '명단을 불러오는 중…',
     error: '명단을 불러오지 못했어요.',
-    ready: `저장한 이름 ${Object.keys(rosterNames).length}명`,
+    ready: count === 30 ? '모든 번호에 이름이 저장됐어요.' : `아직 이름이 없는 번호 ${30 - count}개`,
   }[rosterState] ?? '';
+  renderRosterEdits();
+  filterRosterRows();
   document.querySelector('#roster-print-state').textContent = {
     loading: '학생 이름 불러오는 중…',
     error: '이름을 불러오지 못해 인쇄에는 번호만 표시돼요.',
@@ -1685,17 +1871,17 @@ function renderRosterAccess() {
 function readRoster(snapshot) {
   const names = snapshot.data()?.names ?? {};
   return Object.fromEntries(Object.entries(names).filter(([number, name]) =>
-    /^(?:[1-9]|[12][0-9]|30)$/.test(number) && typeof name === 'string' && name.length <= 24));
+    /^(?:[1-9]|[12][0-9]|30)$/.test(number) && typeof name === 'string' && name.trim() && name.length <= 24));
 }
 
 async function syncSeatRoster(app, uid) {
   const session = ++rosterSession;
-  const dialog = document.querySelector('#seat-roster');
-  if (dialog?.open) dialog.close();
-  document.querySelector('#seat-roster-fields')?.replaceChildren();
   rosterAccount = uid ? { app, uid } : null;
   rosterNames = {};
   rosterClient = null;
+  rosterSaving = false;
+  rosterFeedback = '';
+  resetRosterInputs({ resetSearch: true });
   rosterState = uid ? 'loading' : 'guest';
   renderRosterAccess();
   if (!uid) return;
@@ -1708,6 +1894,7 @@ async function syncSeatRoster(app, uid) {
     if (session !== rosterSession) return;
     rosterClient = { sdk, database, ref };
     rosterNames = names;
+    resetRosterInputs();
     rosterState = 'ready';
   } catch {
     if (session !== rosterSession) return;
@@ -1718,52 +1905,56 @@ async function syncSeatRoster(app, uid) {
 
 function bindSeatRoster(refresh) {
   rosterRefresh = refresh;
-  const dialog = document.querySelector('#seat-roster');
-  const fields = dialog.querySelector('#seat-roster-fields');
-  const status = dialog.querySelector('#seat-roster-status');
-  const save = dialog.querySelector('#seat-roster-save');
-  const close = dialog.querySelector('#seat-roster-close');
-  dialog.addEventListener('cancel', (event) => { if (close.disabled) event.preventDefault(); });
-  close.onclick = () => dialog.close();
-  dialog.addEventListener('close', () => { if (!dialog.open) fields.replaceChildren(); });
-
-  document.querySelector('#open-seat-roster').onclick = async () => {
-    if (!rosterAccount) return;
-    if (!rosterClient) await syncSeatRoster(rosterAccount.app, rosterAccount.uid);
-    if (!rosterAccount) return;
-    fields.replaceChildren();
-    close.disabled = false;
-    save.disabled = !rosterClient;
-    status.textContent = rosterClient ? '' : '이름을 불러오지 못했어요. 닫은 뒤 다시 열어주세요.';
-    if (rosterClient) {
-      for (let number = 1; number <= 30; number++) {
-        const label = document.createElement('label');
-        const caption = document.createElement('span');
-        const field = document.createElement('input');
-        caption.textContent = `${number}번`;
-        field.name = String(number);
-        field.maxLength = 24;
-        field.value = rosterNames[number] ?? '';
-        label.append(caption, field);
-        fields.append(label);
-      }
-    }
-    if (!dialog.open) dialog.showModal();
+  const form = document.querySelector('#seat-roster-form');
+  const fields = form.querySelector('#seat-roster-fields');
+  for (let number = 1; number <= 30; number++) {
+    const row = document.createElement('label');
+    row.className = 'roster-row';
+    row.dataset.rosterRow = number;
+    const caption = document.createElement('span');
+    caption.className = 'roster-row-number';
+    caption.textContent = `${number}번`;
+    const field = document.createElement('input');
+    field.name = String(number);
+    field.maxLength = 24;
+    field.placeholder = '이름 입력';
+    field.dataset.rosterName = '';
+    field.setAttribute('aria-label', `${number}번 학생 이름`);
+    const status = document.createElement('span');
+    status.className = 'roster-row-state';
+    row.append(caption, field, status);
+    fields.append(row);
+  }
+  resetRosterInputs();
+  fields.oninput = ({ target }) => {
+    if (!target.matches('input[data-roster-name]')) return;
+    rosterDraft[target.name] = target.value.trim();
+    rosterFeedback = '';
+    renderRosterEdits();
+  };
+  form.querySelector('#seat-roster-search').oninput = filterRosterRows;
+  for (const button of form.querySelectorAll('[data-roster-filter]')) {
+    button.onclick = () => { rosterFilter = button.dataset.rosterFilter; filterRosterRows(); };
+  }
+  form.querySelector('#seat-roster-discard').onclick = () => {
+    resetRosterInputs();
+    rosterFeedback = '저장하지 않은 변경을 취소했어요.';
+    renderRosterAccess();
+  };
+  document.querySelector('#seat-roster-retry').onclick = () => {
+    if (rosterAccount && rosterState === 'error') void syncSeatRoster(rosterAccount.app, rosterAccount.uid);
   };
 
-  dialog.querySelector('form').onsubmit = async (event) => {
+  form.onsubmit = async (event) => {
     event.preventDefault();
-    if (!rosterClient || save.disabled) return;
-    const changes = Array.from(new FormData(event.currentTarget), ([number, value]) => [number, value.trim()])
-      .filter(([number, value]) => value !== (rosterNames[number] ?? ''));
-    if (!changes.length) { dialog.close(); return; }
+    if (!rosterClient || rosterSaving) return;
+    const changes = rosterChanges();
+    if (!changes.length) return;
 
     const session = rosterSession;
     const { sdk, database, ref } = rosterClient;
-    const inputs = fields.querySelectorAll('input');
-    for (const input of inputs) input.disabled = true;
-    save.disabled = close.disabled = true;
-    status.textContent = '이름을 저장하는 중…';
+    rosterSaving = true;
+    renderRosterEdits();
     try {
       const names = await sdk.runTransaction(database, async (transaction) => {
         const next = readRoster(await transaction.get(ref));
@@ -1776,14 +1967,14 @@ function bindSeatRoster(refresh) {
       });
       if (session !== rosterSession) return;
       rosterNames = names;
-      renderRosterAccess();
-      dialog.close();
+      resetRosterInputs();
+      rosterFeedback = '학생 이름을 저장했어요.';
     } catch {
-      if (session === rosterSession) status.textContent = '저장하지 못했어요. 연결을 확인한 뒤 다시 시도해주세요.';
+      if (session === rosterSession) rosterFeedback = '저장하지 못했어요. 연결을 확인한 뒤 다시 시도해주세요.';
     } finally {
       if (session === rosterSession) {
-        for (const input of inputs) input.disabled = false;
-        save.disabled = close.disabled = false;
+        rosterSaving = false;
+        renderRosterAccess();
       }
     }
   };
@@ -1835,9 +2026,8 @@ function renderSeatAccount() {
     const myPage = document.querySelector('#seat-my-page');
     if (!seatUser && !myPage.hidden) showSeatMyPage(false, button);
     myPageButton.hidden = !seatUser || !myPage.hidden;
-    document.querySelector('#my-account-provider').textContent = seatUser ? provider : '';
-    document.querySelector('#my-account-name').textContent = seatUser?.displayName ?? '';
-    document.querySelector('#my-account-name-row').hidden = !seatUser?.displayName;
+    document.querySelector('#my-account-provider').textContent = seatUser ? `${provider} 로그인` : '';
+    document.querySelector('#my-account-name').textContent = seatUser ? seatUser.displayName || `${provider} 계정` : '';
   }
   const dialog = seatLoginDialog();
   if (!dialog) return;
@@ -1850,6 +2040,7 @@ function showSeatMyPage(open, focusTarget) {
   document.querySelector('#seat-my-page').hidden = !open;
   document.querySelector('#status-message').hidden = open;
   document.querySelector('#open-seat-my-page').hidden = open || !seatUser;
+  window.scrollTo(0, 0);
   focusTarget?.focus();
 }
 
@@ -1897,6 +2088,7 @@ function bindSeatAccount() {
   button.onclick = () => {
     if (!seatUser) { seatLoginDialog().showModal(); return; }
     error.hidden = true;
+    dialog.querySelector('#seat-logout-draft').hidden = !hasUnsavedSeatRoster();
     dialog.showModal();
   };
   no.onclick = () => dialog.close();
