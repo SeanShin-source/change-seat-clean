@@ -181,6 +181,8 @@ h1:focus {
 .theme-toggle { min-height: 40px; padding: 6px 11px; font-size: 13px; gap: 6px; }
 .theme-toggle .icon { width: 17px; height: 17px; }
 .theme-toggle[aria-pressed="true"] { border-color: var(--blue); }
+.developer-credit { color: var(--muted); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.guide-credit { margin-top: 12px; text-align: center; }
 .naver-button { padding: 6px 12px; }
 .naver-status { font-size: 13px; }
 .naver-status:empty { display: none; }
@@ -1305,13 +1307,14 @@ h1:focus {
 @media (max-width: 560px) {
   .app-header { flex-wrap: wrap; gap: 9px; }
   .header-actions { width: 100%; }
+  .page-footer { flex-wrap: wrap; }
 }
 
 @media print {
   @page { margin: 12mm; }
   :root, body { color-scheme: light; background: white; color: #18253b; }
   .app-header, .settings, .page-footer, .selection-panel, .export-actions,
-  .phase-badge, .seat-footer, .column-labels { display: none !important; }
+  .phase-badge, .seat-footer, .column-labels, .developer-credit { display: none !important; }
   .app-shell, .workspace { display: block; max-width: none; padding: 0; }
   .classroom { display: block; padding: 0; border: 0; box-shadow: none; break-inside: avoid; }
   .classroom-heading { justify-content: center; }
@@ -1524,6 +1527,8 @@ const notices = [
   '수동 배정으로 번호를 추가하거나, 이미 배정된 학생의 자리를 옮기고 교환할 수 있어요.',
 ];
 
+const developerCredit = '<small class="developer-credit">개발 · 신성현</small>';
+
 function welcomeScreen() {
   return `<main class="welcome"><div class="welcome-card">
     <div class="welcome-actions">${themeButton()}</div>
@@ -1531,7 +1536,7 @@ function welcomeScreen() {
     <h1>자리바꾸기 프로그램 실행하기</h1><p class="welcome-subtitle">자리바꾸기를 시작하기 전 아래 유의사항을 확인해주세요.</p>
     <ol class="notice-list">${notices.map((notice) => `<li>${notice}</li>`).join('')}</ol>
     <button type="button" class="button primary start-button" id="start">시작하기 ${icon('arrow')}</button>
-    <p class="welcome-footer">즐거운 교실, 새로운 자리로</p>
+    <p class="welcome-footer">${developerCredit}</p>
   </div></main>`;
 }
 
@@ -1585,7 +1590,7 @@ function mainScreen() {
         <div class="export-actions"><span id="roster-print-state" class="muted" role="status"></span><button id="print-seats" class="button secondary" type="button">인쇄 / PDF 저장</button><button id="save-seats" class="button secondary" type="button">좌석표 저장 (HTML)</button></div>
       </section>
     </main>
-    <footer class="page-footer"><span>우리 교실, 함께 만드는 새로운 하루</span><span id="status-message" role="status" aria-live="polite">학생 수와 사용할 좌석을 확인해주세요.</span></footer>
+    <footer class="page-footer">${developerCredit}<span id="status-message" role="status" aria-live="polite">학생 수와 사용할 좌석을 확인해주세요.</span></footer>
   </div>
   <dialog id="seat-logout" class="help-dialog logout-dialog" aria-labelledby="seat-logout-title">
     <h2 id="seat-logout-title">로그아웃 하시겠습니까?</h2>
@@ -1602,7 +1607,7 @@ function mainScreen() {
       <div class="roster-actions"><button id="seat-roster-close" class="button secondary" type="button">닫기</button><button id="seat-roster-save" class="button primary" type="submit">이름 저장</button></div>
     </form>
   </dialog>
-  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title"><h2 id="help-title">자리바꾸기 사용 안내</h2><ol class="notice-list">${notices.map((notice) => `<li>${notice}</li>`).join('')}</ol><p class="hint">배정 초기화를 누르면 학생 자리만 지워지고 번호 범위와 좌석 사용 설정은 유지됩니다.</p><button id="close-help" type="button" class="button primary">확인</button></dialog>
+  <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title"><h2 id="help-title">자리바꾸기 사용 안내</h2><ol class="notice-list">${notices.map((notice) => `<li>${notice}</li>`).join('')}</ol><p class="hint">배정 초기화를 누르면 학생 자리만 지워지고 번호 범위와 좌석 사용 설정은 유지됩니다.</p><button id="close-help" type="button" class="button primary">확인</button><p class="guide-credit">${developerCredit}</p></dialog>
   <dialog id="reset-dialog" class="help-dialog" aria-labelledby="reset-title"><h2 id="reset-title">자리 배정을 초기화할까요?</h2><p>배정된 자리와 추첨 중인 번호가 지워집니다. 번호 범위와 좌석 사용 설정은 유지됩니다.</p><form method="dialog" class="dialog-actions"><button class="button secondary" value="cancel" autofocus>취소</button><button class="button primary" value="reset">초기화</button></form></dialog>
   <div id="countdown-overlay" class="countdown-overlay" role="dialog" aria-modal="true" aria-labelledby="countdown-title" tabindex="-1" hidden><div class="countdown-card"><p id="countdown-title">새로운 자리를 준비하고 있어요</p><div id="countdown-number" class="countdown-number" role="status" aria-live="assertive" aria-atomic="true">3</div><span>잠시 후 우리 반 자리가 공개됩니다.</span></div></div>`;
 }
